@@ -2,17 +2,24 @@ import { Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
-export const WIDTH = width;
-export const HEIGHT = height;
-export const CENTER_X = width / 2;
-export const CENTER_Y = height / 2;
+export let WIDTH = width;
+export let HEIGHT = height;
+export let CENTER_X = width / 2;
+export let CENTER_Y = height / 2;
 
 // Arena sizing
 export const MOON_RADIUS = 90;
 export const MOON_SIZE = 45;
 export const EARTH_SIZE = 90;
 export const MAX_ORBIT_RADIUS = MOON_RADIUS * 1.8;
-export const SPAWN_DIST = 600;
+export let SPAWN_DIST = Math.max(600, Math.hypot(width, height) / 2 + 100);
+Dimensions.addEventListener("change", ({ window }) => {
+  WIDTH = window.width;
+  HEIGHT = window.height;
+  CENTER_X = WIDTH / 2;
+  CENTER_Y = HEIGHT / 2;
+  SPAWN_DIST = Math.max(600, Math.hypot(WIDTH, HEIGHT) / 2 + 100);
+});
 
 // Visuals / economy
 export const NUM_STARS = 80;

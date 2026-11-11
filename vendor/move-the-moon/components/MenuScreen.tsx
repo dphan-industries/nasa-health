@@ -1,15 +1,13 @@
 import React from "react";
 import {
   Animated,
-  Dimensions,
+  useWindowDimensions,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { UITheme, withAlpha } from "../constants/uiThemes";
-
-const { height } = Dimensions.get("window");
 
 type Props = {
   highScore: number;
@@ -28,9 +26,15 @@ export function MenuScreen({
   onLeaderboard,
   theme,
 }: Readonly<Props>) {
+  const { height } = useWindowDimensions();
   return (
     <View style={styles.overlay} pointerEvents="box-none">
-      <View style={styles.titleWrap}>
+      <View
+        style={[
+          styles.titleWrap,
+          { marginTop: height < 450 ? 8 : height * 0.08 },
+        ]}
+      >
         <Text style={[styles.titleLine1, { color: theme.titleSub }]}>
           MOVE THE
         </Text>
@@ -38,6 +42,7 @@ export function MenuScreen({
           style={[
             styles.titleLine2,
             {
+              fontSize: height < 450 ? 32 : 58,
               color: theme.titleMain,
               textShadowColor: withAlpha(theme.titleGlow, 0.95),
             },
@@ -49,7 +54,12 @@ export function MenuScreen({
 
       <View style={{ flex: 1 }} />
 
-      <View style={styles.bottomSection}>
+      <View
+        style={[
+          styles.bottomSection,
+          { marginBottom: height < 450 ? 8 : height * 0.08 },
+        ]}
+      >
         {highScore > 0 && (
           <View
             style={[
@@ -154,7 +164,6 @@ const styles = StyleSheet.create({
   },
   titleWrap: {
     alignItems: "center",
-    marginTop: height * 0.08,
   },
   titleLine1: {
     fontSize: 14,
@@ -171,7 +180,7 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     alignItems: "center",
-    marginBottom: height * 0.08,
+
     gap: 16,
   },
   bestScoreDisplay: {

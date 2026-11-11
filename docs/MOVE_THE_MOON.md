@@ -16,3 +16,7 @@ Drag selection fix: game-local CSS disables text selection and native image drag
 
 Browser verification of drag fix: dragged across the active arena; computed user-select was none and the game document selection remained empty. Keyboard pause still opened the pause controls. All 18 offline/storage/sensor tests pass.
 
+
+## Mobile full-screen play
+
+Choose **Play full screen** from the recreation deck. Drag around Earth with your finger. The player fills the viewport, requests native fullscreen where supported, and keeps Close game and Restart available. Rotation recenters the arena and pauses active runs; resume when ready. Short-screen panels scroll. Install Crew Health on the home screen for standalone play on browsers without native fullscreen. Offline play requires OFFLINE READY first.

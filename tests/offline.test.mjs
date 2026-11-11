@@ -1,7 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import vm from "node:vm";
+test("offline game inventory contains the exported script and existing local assets", () => {
+  const source = readFileSync(new URL("../public/sw.js", import.meta.url), "utf8");
+  const inventory = vm.runInNewContext(source.match(/const BASE = (\[[\s\S]*?\]);/)[1]);
+  const html = readFileSync(new URL("../public/games/move-the-moon/index.html", import.meta.url), "utf8");
+  const script = html.match(/src="([^"]+entry-[^"]+\.js)"/)[1];
+  assert.ok(inventory.includes(script), "current game bundle must be cached");
+  for (const url of inventory.filter(url => url.startsWith("/games/move-the-moon/")))
+    assert.ok(existsSync(new URL(`../public${url}`, import.meta.url)), `missing asset: ${url}`);
+});
 function worker() {
   const entries = new Map();
   const handlers = {};
@@ -32,7 +41,7 @@ function worker() {
     },
     caches: {
       open: async () => cache,
-      keys: async () => ["crew-health-v16"],
+      keys: async () => ["crew-health-v20"],
       delete: async () => true,
     },
     self: {

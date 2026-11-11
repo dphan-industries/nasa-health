@@ -3403,3 +3403,14 @@ body:has(.quiet-mode) .global-emergency {
 .daily-routine summary { cursor: pointer; min-height: 44px; }
 .routine-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
 @media(max-width:760px) { .assessment-grid,.hazard-grid,.symptom-grid,.routine-grid { grid-template-columns: 1fr; } }
+
+.moon-dialog { position:fixed; inset:0; margin:0; padding:0; border:0; width:100vw; max-width:none; height:100vh; height:100dvh; max-height:none; background:#000; color:#edf6ff; }
+.moon-dialog::backdrop { background:#000; }
+.moon-stage { display:flex; flex-direction:column; width:100%; height:100%; min-height:0; background:#000; }
+.moon-stage:fullscreen { width:100vw; height:100vh; }
+.moon-toolbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left)); background:#0b1725; border-bottom:1px solid #34536b; flex:0 0 auto; }
+.moon-toolbar-actions { display:flex; gap:6px; }
+.moon-toolbar button { min-height:44px; padding:8px 12px; }
+.moon-fullscreen-frame { display:block; width:100%; flex:1 1 0; min-height:0; border:0; padding-bottom:env(safe-area-inset-bottom); background:#000; }
+@media(max-width:520px) { .moon-toolbar { flex-wrap:wrap; } .moon-toolbar strong { font-size:13px; } .moon-toolbar-actions { margin-left:auto; } .moon-toolbar button { padding:8px; font-size:12px; } }
+.moon-fullscreen-note { margin:0; padding:8px 12px; font-size:12px; background:#0b1725; color:#edf6ff; }

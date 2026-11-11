@@ -1,7 +1,7 @@
 import React from "react";
 import {
   ActivityIndicator,
-  Dimensions,
+  useWindowDimensions,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -9,8 +9,6 @@ import {
 } from "react-native";
 import { getMedal } from "../constants/medals";
 import { UITheme, withAlpha } from "../constants/uiThemes";
-
-const { width } = Dimensions.get("window");
 
 type Props = {
   score: number;
@@ -85,6 +83,7 @@ export function GameOverScreen({
       ]}
     >
       <View
+        testID="moon-panel"
         style={[
           styles.card,
           {
@@ -336,7 +335,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     alignItems: "center",
     borderWidth: 1,
-    width: width * 0.84,
+    width: "90%",
+    maxWidth: 540,
   },
   title: {
     fontSize: 24,

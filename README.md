@@ -186,9 +186,13 @@ Expand **Onboard reminder** to choose a label and device-local date/time, or use
 
 ![Move the Moon menu inside Crew Health](docs/screenshots/16-move-the-moon.jpg)
 
-The recreation screen replaces Earth Room. **Launch Move the Moon** opens the bundled web version of David’s original Desktop Expo game, including its planets, fonts, sounds, original gameplay, shop, and local scores. The original PC project is untouched. **Close game** ends the current run; **Restart game** asks before reloading the game. Native app progress is not imported into this web copy.
+The recreation screen replaces Earth Room. **Play full screen** opens the bundled web version of David’s original Desktop Expo game, including its planets, fonts, sounds, original gameplay, shop, and local scores. The original PC project is untouched. **Close game** ends the current run; **Restart** asks before reloading the game. Native app progress is not imported into this web copy.
 
 The menu offers **PLAY**, **SHOP**, and **SCORES**. Long-press Earth on the menu to enter the original **Peace mode**, which disables normal asteroid gameplay for a quieter interaction. Sound starts muted and can be enabled from the game controls. Native rewarded ads and their reward buttons are disabled; there are no ad requests or simulated ad rewards.
+
+The game now fills the viewport on phones with finger dragging, a persistent Close game button, and portrait/landscape resizing. Rotating during a run pauses it and recenters the arena. Full screen requests browser fullscreen where supported; installing Crew Health on the home screen gives standalone play. Phone-sized browser checks and offline reopening passed; physical phone touch testing remains outstanding.
+
+![Full-screen mobile Move the Moon player](docs/screenshots/25-mobile-game.png)
 
 ### 17. Game shop — planets, backgrounds, and sounds
 
@@ -290,7 +294,7 @@ For rebuilding the Expo game, web adaptations, and offline asset inventory detai
 See [CHALLENGE_ALIGNMENT.md](docs/CHALLENGE_ALIGNMENT.md) for the current full-brief audit and source register. Older screenshots 1–20 illustrate earlier screens; 21–24 show the expanded workflows.
 
 
-The current 24 automated tests cover input formats, database persistence and write failures, schema migration, report validation/merge, BLE packet parsing, illustrative flags, cached navigation, separate cached game navigation, and incomplete-cache readiness. Build and lint have also passed. Browser checks additionally verified decimal temperature entry, glucose saving and trends, source-linked assessment, persisted Mars environment, emergency checklist-to-notes transfer, saved follow-ups, extended routine records, and complete medical handoff downloads. A new temperature was saved and retained after refresh with the preview server stopped. The updated Mission Health layout was checked at 390px with no page overflow.
+The current 25 automated tests cover input formats, database persistence and write failures, schema migration, report validation/merge, BLE packet parsing, illustrative flags, cached navigation, separate cached game navigation, and incomplete-cache readiness. Build and lint have also passed. Browser checks additionally verified decimal temperature entry, glucose saving and trends, source-linked assessment, persisted Mars environment, emergency checklist-to-notes transfer, saved follow-ups, extended routine records, and complete medical handoff downloads. A new temperature was saved and retained after refresh with the preview server stopped. The updated Mission Health layout was checked at 390px with no page overflow.
 
 Browser checks cover manual entry/review/save, demo sensor labels, wellbeing saves, guide expansion, emergency simulation, game launch/shop/gameplay/pause, and the no-selection drag fix. Screenshots above were captured from a separate local production preview using fictional data.
 

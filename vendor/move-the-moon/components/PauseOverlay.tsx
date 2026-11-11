@@ -30,6 +30,7 @@ export function PauseOverlay({
       ]}
     >
       <View
+        testID="moon-panel"
         style={[
           styles.card,
           {

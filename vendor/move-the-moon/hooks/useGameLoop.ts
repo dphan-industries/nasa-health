@@ -1,5 +1,6 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import { useEffect, useRef } from "react";
+import { Dimensions } from "react-native";
 import {
   BASE_ASTEROID_SPEED,
   BASE_SPAWN_RATE,
@@ -53,6 +54,7 @@ type Props = {
   scoreRef: MutableRefObject<number>;
   asteroidId: MutableRefObject<number>;
   spawnIndexRef: MutableRefObject<number>;
+  setPaused: Dispatch<SetStateAction<boolean>>;
   setAsteroids: Dispatch<SetStateAction<Asteroid[]>>;
   setScore: Dispatch<SetStateAction<number>>;
   setRunCoins: Dispatch<SetStateAction<number>>;
@@ -78,6 +80,7 @@ export function useGameLoop({
   asteroidId,
   spawnIndexRef,
   setAsteroids,
+  setPaused,
   setScore,
   setRunCoins,
   setGameOver,
@@ -89,6 +92,25 @@ export function useGameLoop({
   gamePhase,
 }: Props) {
   const asteroidsRef = useRef<Asteroid[]>([]);
+  useEffect(() => {
+    let previous = Dimensions.get("window");
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
+      const dx = (window.width - previous.width) / 2;
+      const dy = (window.height - previous.height) / 2;
+      previous = window;
+      asteroidsRef.current = asteroidsRef.current.map((a) => ({
+        ...a,
+        x: a.x + dx,
+        y: a.y + dy,
+      }));
+      setAsteroids([...asteroidsRef.current]);
+      if (screen === "game" && !gameOver) {
+        pausedRef.current = true;
+        setPaused(true);
+      }
+    });
+    return () => subscription.remove();
+  }, [screen, gameOver, setAsteroids, setPaused, pausedRef]);
   const spawnTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const triggerBlockEffectRef = useRef(triggerBlockEffect);

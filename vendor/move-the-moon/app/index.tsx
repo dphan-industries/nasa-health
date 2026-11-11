@@ -12,7 +12,7 @@ import {
   AppState,
   AppStateStatus,
   BackHandler,
-  Dimensions,
+  useWindowDimensions,
   PanResponder,
   StyleSheet,
   View,
@@ -578,6 +578,7 @@ export default function App() {
     asteroidId,
     spawnIndexRef,
     setAsteroids,
+    setPaused,
     setScore,
     setRunCoins,
     setGameOver,
@@ -589,7 +590,7 @@ export default function App() {
     gamePhase,
   });
 
-  const { width } = Dimensions.get("window");
+  const { width } = useWindowDimensions();
 
   const earthInteractive = screen === "menu" || gameMode === "peace";
 
@@ -647,38 +648,64 @@ export default function App() {
 
   // Orbit gestures must not start native browser text selection or image dragging.
   useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const style = document.createElement('style');
-    style.textContent = '#root, #root * { -webkit-user-select: none !important; user-select: none !important; -webkit-touch-callout: none; } #root img { -webkit-user-drag: none; }';
+    if (typeof document === "undefined") return;
+    const style = document.createElement("style");
+    style.textContent =
+      'html, body, #root { height: 100%; overflow: clip !important; overscroll-behavior: none; } body { position: fixed; inset: 0; width: 100%; } #root, #root * { -webkit-user-select: none !important; user-select: none !important; -webkit-touch-callout: none; } #root img { -webkit-user-drag: none; } html[data-game-screen="game"] #root { touch-action: none; overscroll-behavior: none; } [data-testid="moon-panel"] { max-height: 94%; overflow-y: auto; overscroll-behavior: contain; }';
     document.head.appendChild(style);
     const prevent = (event: Event) => event.preventDefault();
-    document.addEventListener('selectstart', prevent);
-    document.addEventListener('dragstart', prevent);
+    document.addEventListener("selectstart", prevent);
+    document.addEventListener("dragstart", prevent);
     return () => {
       style.remove();
-      document.removeEventListener('selectstart', prevent);
-      document.removeEventListener('dragstart', prevent);
+      document.removeEventListener("selectstart", prevent);
+      document.removeEventListener("dragstart", prevent);
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.dataset.gameScreen = screen;
+    return () => {
+      delete document.documentElement.dataset.gameScreen;
+    };
+  }, [screen]);
+
   // Web companion controls; preserve the original touch gameplay.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const handleKey = (event: KeyboardEvent) => {
-      if (screen !== 'game' || gameOverRef.current) return;
-      if (event.key === 'Escape' || event.code === 'Space') {
-        event.preventDefault(); setPaused(p => { pausedRef.current = !p; return !p; });
-      }
-      if (!pausedRef.current && ['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      if (screen !== "game" || gameOverRef.current) return;
+      if (event.key === "Escape" || event.code === "Space") {
         event.preventDefault();
-        const angle = moonAngleRef.current + (event.key === 'ArrowRight' ? 12 : -12);
-        moonAngleRef.current = angle; setMoonAngle(angle);
+        setPaused((p) => {
+          pausedRef.current = !p;
+          return !p;
+        });
+      }
+      if (
+        !pausedRef.current &&
+        ["ArrowLeft", "ArrowRight"].includes(event.key)
+      ) {
+        event.preventDefault();
+        const angle =
+          moonAngleRef.current + (event.key === "ArrowRight" ? 12 : -12);
+        moonAngleRef.current = angle;
+        setMoonAngle(angle);
       }
     };
-    const hide = () => { if (document.hidden && screen === 'game') { pausedRef.current = true; setPaused(true); } };
-    window.addEventListener('keydown', handleKey);
-    document.addEventListener('visibilitychange', hide);
-    return () => { window.removeEventListener('keydown', handleKey); document.removeEventListener('visibilitychange', hide); };
+    const hide = () => {
+      if (document.hidden && screen === "game") {
+        pausedRef.current = true;
+        setPaused(true);
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    document.addEventListener("visibilitychange", hide);
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      document.removeEventListener("visibilitychange", hide);
+    };
   }, [screen]);
 
   const panResponder = PanResponder.create({

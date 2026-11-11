@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  Dimensions,
+  useWindowDimensions,
   Image,
   ScrollView,
   StyleSheet,
@@ -11,8 +11,6 @@ import {
 import { Skin, SKIN_ASSETS, SkinType } from "../constants/skins";
 import { SoundEffectOption } from "../constants/sounds";
 import { UITheme, withAlpha } from "../constants/uiThemes";
-
-const { width, height } = Dimensions.get("window");
 
 type ShopTab = SkinType | "sound";
 
@@ -33,8 +31,6 @@ type Props = {
   onBack: () => void;
   theme: UITheme;
 };
-
-const CARD_WIDTH = width * 0.9;
 
 export function ShopScreen({
   skins,
@@ -73,6 +69,7 @@ export function ShopScreen({
       ]}
     >
       <View
+        testID="moon-panel"
         style={[
           styles.card,
           {
@@ -414,8 +411,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 16,
     borderWidth: 1,
-    width: CARD_WIDTH,
-    maxHeight: height * 0.82,
+    width: "90%",
+    maxWidth: 640,
+    maxHeight: "94%",
   },
   header: {
     flexDirection: "row",
@@ -468,7 +466,7 @@ const styles = StyleSheet.create({
     fontFamily: "Audiowide_400Regular",
   },
   grid: {
-    maxHeight: height * 0.42,
+    maxHeight: 200,
   },
   gridInner: {
     width: "100%",
