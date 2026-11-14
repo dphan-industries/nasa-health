@@ -3542,3 +3542,26 @@ body { background:#040915; }
 @media(hover:none) { .touch-console .console-tile:hover,.touch-console .crew-person:hover { transform:none; } }
 @media(prefers-reduced-motion:reduce) { .touch-console main { animation:none; }.touch-console button { transition:none; }.touch-console .console-tile:hover,.touch-console .console-tile:active,.touch-console .crew-person:hover,.touch-console .crew-person:active { transform:none; }::view-transition-group(*),::view-transition-old(*),::view-transition-new(*) { animation:none!important; } }
 .touch-console.emergency-mode .workspace { background:transparent; }
+/* Shared surfaces: a straight left rail, wider inset, and readable dark-blue tones. */
+:root { --bg:#0b1424; --surface:#14243a; --text:#f5f8ff; --muted:#c4d2e6; }
+body { background:#0b1424; }
+.touch-console { background-color:#0b1424; background-image:linear-gradient(135deg,#263e5b26,#0b142414),url('/brand/deep-space-background.svg'); }
+.console-bar { background:#0b1424df; }
+.touch-console .console-tile,.touch-console .crew-person,.touch-console .crew-vitals div,.touch-console .assessment,.touch-console .guide-card,.touch-console .moon-launch { background:#14243ac9; border:0; border-left:3px solid #6e8fad; border-radius:0 8px 8px 0; padding:24px 28px 24px 32px; box-shadow:none; }
+.touch-console .console-tile:hover,.touch-console .crew-person:hover { background:#1b3049; border-left-color:#adc9e8; }
+.touch-console .console-tile:active,.touch-console .crew-person:active { background:#233b57; }
+.touch-console .crew-person.selected { background:#1b3049; box-shadow:none; border-left-color:#eafe07; }
+.touch-console .assessment.urgent { border-left-color:#ffad87; }.touch-console .assessment.review { border-left-color:#eafe07; }
+.touch-console .instruction,.touch-console .measurement-instructions { border:0; border-left:3px solid #6e8fad; border-radius:0; padding:20px 24px 20px 28px; }
+.touch-console .alert,.touch-console .notice,.touch-console .daily-routine,.touch-console .body-map,.touch-console .device-cache-status,.touch-console .history-table,.touch-console fieldset { border-radius:0; }
+.touch-console input,.touch-console select,.touch-console textarea,.touch-console .mood-options label { background:#101e32; border-color:#6e8fad; border-radius:6px; color:#f5f8ff; }
+.touch-console .console-tile-label,.touch-console .crew-person strong,.touch-console h1,.touch-console h2,.touch-console h3 { color:#f5f8ff; }
+.touch-console .console-tile-hint,.touch-console .fine-print,.touch-console .panel p,.touch-console label,.touch-console .eyebrow,.touch-console .crew-person small,.touch-console .crew-person > span:not(.crew-initials),.touch-console .crew-vitals dt,.touch-console .crew-detail > small,.touch-console footer { color:#c4d2e6; opacity:1; }
+.touch-console .instruction a,.touch-console .panel a { color:#b9ddff; }
+.console-tile-icon { color:#d6e6fa; }
+@media(max-width:699px) { .touch-console .console-tile,.touch-console .crew-person,.touch-console .crew-vitals div,.touch-console .assessment,.touch-console .guide-card { padding:20px 16px 20px 20px; }.touch-console .instruction,.touch-console .measurement-instructions { padding:16px 18px; } }
+/* Transparent masthead aligned with the main content. */
+.touch-console .console-bar { max-width:1240px; margin-inline:auto; min-height:88px; padding:12px 32px; background:transparent; border:0; box-shadow:none; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
+.console-brand { gap:14px; letter-spacing:2.5px; }.console-brand > svg { color:#d6e6fa; }.console-brand small { font-size:9px; letter-spacing:3px; color:#c4d2e6; margin-top:7px; }
+.space-apps-logo img { width:140px; }.space-apps-logo { padding:8px 0 8px 24px; }
+@media(max-width:699px) { .touch-console .console-bar { padding:10px 16px; min-height:76px; }.console-brand { font-size:14px; letter-spacing:1.5px; }.console-brand small { font-size:8px; letter-spacing:2px; }.space-apps-logo img { width:116px; }.space-apps-logo { padding-left:12px; } }

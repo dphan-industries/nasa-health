@@ -14,7 +14,7 @@ The Deep Space Health planet icon is a separate project graphic. The user-suppli
 
 ## Crew and navigation
 
-The Crew overview contains six explicitly fictional training profiles. Selecting a crew member shows that member's illustrative vital signs, sleep, mood, and check-in note. **My saved history** opens this browser's actual saved entries separately. This does not implement multi-device crew synchronization or access-controlled medical sharing.
+The Crew overview contains three team profiles: Viet Phan, Edsel Ong, and Vicki Leow, with explicitly labeled demo health values. Selecting a crew member shows that member's illustrative vital signs, sleep, mood, and check-in note. **My saved history** opens this browser's actual saved entries separately. This does not implement multi-device crew synchronization or access-controlled medical sharing.
 
 The main screen still exposes Emergency assist. Feature pages use one large arrow-only **Back** control with an accessible label, without top-right Home or emergency buttons. Record vitals is centered. The wellbeing screen uses a labeled body-area menu; the body illustration has been removed.
 
@@ -25,3 +25,7 @@ Current interface: plain feature descriptions, no promotional slogans, arrow-onl
 Back is placed at the left of the page heading; the title is aligned to the right. Offline availability is shown in Device & data instead of beside every page title.
 
 The current theme uses a dim, static SVG starfield and transparent reading surfaces. Navigation controls have subtle touch/hover feedback, and supported browsers crossfade screen changes in 360 ms. Reduced-motion preferences disable screen movement. The background is cached for offline use. [Home preview](docs/screenshots/33-relaxed-space-home.png) · [Vitals preview](docs/screenshots/34-seamless-vitals.png).
+
+Container update: straight 3px left rails with square left corners, a 32px desktop content inset (20px on phones), and a brighter navy surface palette. Primary text, secondary text, and links were checked against the brightest interactive background at 10.77:1, 7.47:1, and 8.09:1. Rails and field boundaries exceed 3:1. Tablet and phone geometry checks confirm no left-corner curvature or horizontal overflow in the reviewed home, crew, and vitals views.
+
+The crew roster displays Viet Phan, Edsel Ong, and Vicki Leow. All health values are demonstration samples, not personal records. The header uses a transparent background, reduced subtitle, and aligned logo spacing.

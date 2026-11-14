@@ -2,76 +2,40 @@
 import { useState } from "react";
 const crew = [
   {
-    name: "Alex Chen",
-    role: "Commander",
-    initials: "AC",
+    name: "Viet Phan",
+    role: "Team member",
+    initials: "VP",
     pulse: 68,
     bp: "118 / 76",
     temperature: "36.7",
     glucose: 94,
     sleep: 7.5,
     mood: "Good",
-    note: "Resting check-in after breakfast. No discomfort reported.",
+    note: "Demo observation for interface testing. No personal health data has been entered.",
   },
   {
-    name: "Maya Patel",
-    role: "Flight surgeon",
-    initials: "MP",
+    name: "Edsel Ong",
+    role: "Team member",
+    initials: "EO",
     pulse: 74,
     bp: "122 / 80",
     temperature: "36.8",
     glucose: 102,
     sleep: 6.5,
     mood: "Neutral",
-    note: "Shorter sleep after overnight duty. Rest period planned.",
+    note: "Demo observation for interface testing. No personal health data has been entered.",
   },
   {
-    name: "Leo Rivera",
-    role: "Pilot",
-    initials: "LR",
+    name: "Vicki Leow",
+    role: "Team member",
+    initials: "VL",
     pulse: 92,
     bp: "130 / 84",
     temperature: "37.0",
     glucose: 108,
     sleep: 7,
     mood: "Good",
-    note: "Pulse recorded after exercise. A resting recheck is scheduled.",
-  },
-  {
-    name: "Sora Kim",
-    role: "Mission scientist",
-    initials: "SK",
-    pulse: 64,
-    bp: "112 / 72",
-    temperature: "36.5",
-    glucose: 89,
-    sleep: 8,
-    mood: "Very good",
-    note: "Completed resistance exercise and morning check-in.",
-  },
-  {
-    name: "Amara Okafor",
-    role: "Flight engineer",
-    initials: "AO",
-    pulse: 79,
-    bp: "124 / 82",
-    temperature: "36.9",
-    glucose: 97,
-    sleep: 5.5,
-    mood: "Low",
-    note: "Low mood and interrupted sleep reported. A private crew check-in is planned.",
-  },
-  {
-    name: "Noah Phan",
-    role: "Systems specialist",
-    initials: "NP",
-    pulse: 71,
-    bp: "120 / 78",
-    temperature: "36.6",
-    glucose: 95,
-    sleep: 7,
-    mood: "Good",
-    note: "Mild right shoulder discomfort after maintenance. Observation logged.",
+    note: "Demo observation for interface testing. No personal health data has been entered.",
   },
 ];
 export default function CrewOverview({
@@ -88,16 +52,13 @@ export default function CrewOverview({
       <div className="crew-overview-heading">
         <div>
           <h2>Crew health records</h2>
-          <p>
-            Fictional training crew · illustrative check-ins, not live
-            monitoring.
-          </p>
+          <p>Team roster · sample health values for demonstration only.</p>
         </div>
         <button className="secondary" onClick={onHistory}>
           My saved history · {recordCount} readings
         </button>
       </div>
-      <div className="crew-roster" aria-label="Fictional crew members">
+      <div className="crew-roster" aria-label="Team members">
         {crew.map((member, index) => (
           <button
             key={member.name}
@@ -113,15 +74,15 @@ export default function CrewOverview({
             <strong>{member.name}</strong>
             <span>{member.role}</span>
             <small>
-              {member.pulse} bpm · {member.sleep} h sleep
+              Demo · {member.pulse} bpm · {member.sleep} h sleep
             </small>
           </button>
         ))}
       </div>
       <div className="panel crew-detail" aria-live="polite">
-        <div className="eyebrow">DEMO RECORD · NOT A CONNECTED CREW MEMBER</div>
+        <div className="eyebrow">DEMO VALUES · NOT PERSONAL HEALTH DATA</div>
         <h2>{person.name}</h2>
-        <p>{person.role} · fictional morning check-in</p>
+        <p>{person.role} · sample check-in</p>
         <dl className="crew-vitals">
           {[
             ["Heart rate", `${person.pulse} bpm`],

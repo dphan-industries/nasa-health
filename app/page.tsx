@@ -284,7 +284,7 @@ export default function Home() {
           >
             <Icon name="planet" size={30} />
             <span>
-              DEEP SPACE<small>HEALTH SYSTEMS · CREW CONSOLE</small>
+              DEEP SPACE<small>HEALTH SYSTEMS</small>
             </span>
           </button>
           <div className="console-bar-actions">

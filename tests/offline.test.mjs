@@ -41,7 +41,7 @@ function worker() {
     },
     caches: {
       open: async () => cache,
-      keys: async () => ["crew-health-v25"],
+      keys: async () => ["crew-health-v27"],
       delete: async () => true,
     },
     self: {

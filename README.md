@@ -4,7 +4,7 @@ The current interface uses a tablet-first **Mission home**: nine large controls 
 
 ![Deep Space Health tablet mission home](docs/screenshots/30-phantasy-brand-console.png)
 
-The **Crew overview** uses six fictional training profiles, separate from this browser’s saved history. The vitals form is centered, and wellbeing uses a body-area menu. [Branding, font licenses, crew-data scope, and updated screenshots](docs/BRANDING.md) document the Space Apps visual system.
+The **Crew overview** uses three named team profiles with explicitly labeled demo health values, separate from this browser’s saved history. The vitals form is centered, and wellbeing uses a body-area menu. [Branding, font licenses, crew-data scope, and updated screenshots](docs/BRANDING.md) document the Space Apps visual system.
 
 
 A space-themed, offline-first health journal and recreation prototype built with Next.js and React. The fictional Asteria mission console brings together manual readings, trends, wellbeing notes, a guide library, device connections, and David’s **Move the Moon** game.
@@ -326,3 +326,5 @@ Current interface: plain feature descriptions, no promotional slogans, arrow-onl
 Back is placed at the left of the page heading; the title is aligned to the right. Offline availability is shown in Device & data instead of beside every page title.
 
 The current theme uses a dim, static SVG starfield and transparent reading surfaces. Navigation controls have subtle touch/hover feedback, and supported browsers crossfade screen changes in 360 ms. Reduced-motion preferences disable screen movement. The background is cached for offline use. [Home preview](docs/screenshots/33-relaxed-space-home.png) · [Vitals preview](docs/screenshots/34-seamless-vitals.png).
+
+The crew roster displays Viet Phan, Edsel Ong, and Vicki Leow. All health values are demonstration samples, not personal records. The header uses a transparent background, reduced subtitle, and aligned logo spacing.
