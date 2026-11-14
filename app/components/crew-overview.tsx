@@ -3,7 +3,8 @@ import { useState } from "react";
 const crew = [
   {
     name: "Viet Phan",
-    role: "Team member",
+    role: "Commander",
+    bio: "Computer science graduate with 6+ years of software engineering experience, specializing in frontend development. Leads application engineering and interface implementation.",
     initials: "VP",
     pulse: 68,
     bp: "118 / 76",
@@ -15,7 +16,8 @@ const crew = [
   },
   {
     name: "Edsel Ong",
-    role: "Team member",
+    role: "Systems Engineer",
+    bio: "Computer science student contributing to application development and engineering.",
     initials: "EO",
     pulse: 74,
     bp: "122 / 80",
@@ -27,7 +29,8 @@ const crew = [
   },
   {
     name: "Vicki Leow",
-    role: "Team member",
+    role: "Habitat Designer",
+    bio: "Art diploma graduate from Singapore. Leads artwork and visual design, with a focus on making the crew environment feel welcoming and comfortable.",
     initials: "VL",
     pulse: 92,
     bp: "130 / 84",
@@ -82,7 +85,8 @@ export default function CrewOverview({
       <div className="panel crew-detail" aria-live="polite">
         <div className="eyebrow">DEMO VALUES · NOT PERSONAL HEALTH DATA</div>
         <h2>{person.name}</h2>
-        <p>{person.role} · sample check-in</p>
+        <p>{person.role}</p>
+        <p>{person.bio}</p>
         <dl className="crew-vitals">
           {[
             ["Heart rate", `${person.pulse} bpm`],
