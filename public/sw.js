@@ -1,5 +1,13 @@
-const CACHE = "crew-health-v20";
+const CACHE = "crew-health-v25";
 const BASE = [
+  "/brand/deep-space-background.svg",
+  "/brand/space-apps-color-white.svg",
+  "/fonts/fira-sans-latin-700-normal.woff2",
+  "/fonts/fira-sans-latin-900-normal.woff2",
+  "/fonts/Fira-Sans-LICENSE.txt",
+  "/fonts/overpass-latin-400-normal.woff2",
+  "/fonts/overpass-latin-700-normal.woff2",
+  "/fonts/Overpass-LICENSE.txt",
   "/games/move-the-moon/_expo/static/js/web/entry-4e67326c86bf7a1d6440ee7ba0d0fc1b.js",
   "/games/move-the-moon/assets/___MoveTheMoon/node_modules/@expo-google-fonts/audiowide/400Regular/Audiowide_400Regular.b32da0c186225df40f7e9dc2d5bccc38.ttf",
   "/games/move-the-moon/assets/___MoveTheMoon/node_modules/@expo-google-fonts/orbitron/400Regular/Orbitron_400Regular.f51de0b72e236467e71439339a673e3c.ttf",

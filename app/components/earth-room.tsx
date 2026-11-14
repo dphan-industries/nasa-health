@@ -229,7 +229,7 @@ export default function EarthRoom({
       <div className="section-heading">
         <div>
           <div className="eyebrow">EARTH ROOM · A MOMENT OF HOME</div>
-          <h2>Somewhere familiar. A little space.</h2>
+          <h2>Earth exploration</h2>
         </div>
         <div className="quiet-actions">
           {quiet && (
@@ -476,7 +476,7 @@ export default function EarthRoom({
             </div>
           </section>
           <section className="panel">
-            <h3>A quiet moment</h3>
+            <h3>Breathing exercise</h3>
             <p>
               Optional comfort tools, not a treatment or a health score. Choose
               Earth, nature illustrations or a personal photo. Sound starts only
@@ -587,7 +587,7 @@ export default function EarthRoom({
           </section>
         </div>
         <section className="panel live-option">
-          <h3>A window beyond the simulation</h3>
+          <h3>External Earth views</h3>
           <p>
             Live orbital views require a connection and may switch to recorded
             footage. No worldwide street-level live-camera coverage is bundled.

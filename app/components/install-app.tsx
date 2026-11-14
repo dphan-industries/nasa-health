@@ -45,12 +45,12 @@ export default function InstallApp({ ready }: { ready: boolean }) {
       const result = await prompt.userChoice;
       setMessage(
         result.outcome === "accepted"
-          ? "Installation accepted. Launch Crew Health from your home screen, then check offline readiness there."
+          ? "Installation accepted. Launch Deep Space Health from your home screen, then check offline readiness there."
           : "Installation dismissed. You can still install from your browser menu.",
       );
     } catch {
       setMessage(
-        "Use your browser menu to install Crew Health. Instructions are below.",
+        "Use your browser menu to install Deep Space Health. Instructions are below.",
       );
     } finally {
       setPrompt(null);
@@ -62,7 +62,7 @@ export default function InstallApp({ ready }: { ready: boolean }) {
       <summary>
         {installed
           ? "✓ Running as an installed app"
-          : "↓ Install Crew Health on your home screen"}
+          : "↓ Install Deep Space Health on your home screen"}
       </summary>
       <p>
         Open your personal health console from its own icon, in an app window.

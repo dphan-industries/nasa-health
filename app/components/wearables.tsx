@@ -172,7 +172,7 @@ export default function Wearables({
   return (
     <section className="panel device-panel">
       <div className="eyebrow">DEVICE BAY · LOCAL BLUETOOTH</div>
-      <h2>Your sensors. One health log.</h2>
+      <h2>Connect a health sensor</h2>
       <p>
         Connect a nearby device that advertises the standard Bluetooth Heart
         Rate or Blood Pressure service. No cloud account or internet is required
@@ -244,7 +244,7 @@ export default function Wearables({
             </ol>
             <p>
               Galaxy Watch 9 has not been hardware-tested with this app.
-              Installing Crew Health on your home screen does not add native
+              Installing Deep Space Health on your home screen does not add native
               Samsung sensor access.
             </p>
             <a

@@ -3414,3 +3414,131 @@ body:has(.quiet-mode) .global-emergency {
 .moon-fullscreen-frame { display:block; width:100%; flex:1 1 0; min-height:0; border:0; padding-bottom:env(safe-area-inset-bottom); background:#000; }
 @media(max-width:520px) { .moon-toolbar { flex-wrap:wrap; } .moon-toolbar strong { font-size:13px; } .moon-toolbar-actions { margin-left:auto; } .moon-toolbar button { padding:8px; font-size:12px; } }
 .moon-fullscreen-note { margin:0; padding:8px 12px; font-size:12px; background:#0b1725; color:#edf6ff; }
+/* Touch console: all destinations on one quiet, tablet-sized surface. */
+.touch-console { background:radial-gradient(ellipse at 20% 0%, #16323d55, transparent 55%), #080e16; }
+.touch-console .workspace { margin-left:0; }
+.console-bar { min-height:76px; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; gap:16px; border-bottom:1px solid #29414b; background:#0b151ee8; }
+.console-brand { display:flex; align-items:center; gap:12px; text-align:left; background:none; border:0; padding:4px 0; color:#9aebed; font-size:17px; font-weight:700; letter-spacing:2px; min-height:44px; }
+.console-brand small { display:block; font-size:9px; letter-spacing:1.8px; color:#8298a6; margin-top:6px; }
+.console-bar-actions { display:flex; align-items:center; gap:12px; }
+.console-mode { font-size:10px; letter-spacing:1.5px; color:#9caebd; border:1px solid #354654; padding:7px 9px; border-radius:4px; }
+.console-home-button,.console-help-button { display:flex; align-items:center; justify-content:center; gap:9px; padding:10px 16px; min-height:48px; border:1px solid #3c626e; background:#162b36; border-radius:10px; font-weight:600; }
+.console-help-button { border-color:#805143; color:#ffb89b; background:#30201d; }
+.touch-console main { max-width:1240px; margin:0 auto; padding:24px 32px 16px; }
+.touch-console .page-heading { margin:0 0 22px; gap:16px; }
+.touch-console .page-heading h1 { font-size:32px; letter-spacing:-1px; margin:6px 0; }
+.touch-console .page-heading p { margin:0; font-size:14px; }
+.touch-console .page-heading .eyebrow { font-size:10px; letter-spacing:2px; }
+.touch-console .page-heading .system-status { font-size:10px; white-space:nowrap; }
+.console-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.console-tile { --tile-accent:#80e7eb; position:relative; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:9px; min-height:154px; padding:22px 26px; border:1px solid #35515e; border-radius:16px; background:linear-gradient(125deg,#192e3c,#10202d); text-align:left; overflow:hidden; isolation:isolate; }
+.console-tile::after { content:""; position:absolute; width:140px; height:140px; border:1px solid var(--tile-accent); border-radius:50%; right:-70px; bottom:-85px; opacity:.18; z-index:-1; }
+.console-tile:hover { border-color:var(--tile-accent); background:#1a3441; }
+.console-tile:active { transform:scale(.985); }
+.console-tile-icon { color:var(--tile-accent); display:flex; margin-bottom:3px; }
+.console-tile-label { font-size:20px; font-weight:600; letter-spacing:-.35px; color:#f0f6fa; }
+.console-tile-hint { font-size:12px; color:#a7bdca; }
+.console-tile-code { position:absolute; right:20px; top:18px; font-size:10px; color:#809da9; letter-spacing:2px; }
+.console-tile-corner { position:absolute; right:20px; bottom:21px; font-size:19px; color:var(--tile-accent); }
+.tone-green { --tile-accent:#a4dcc5; background:linear-gradient(125deg,#1b302f,#102329); border-color:#34554f; }
+.tone-violet { --tile-accent:#c5b5f3; background:linear-gradient(125deg,#272b40,#192131); border-color:#484860; }
+.tone-orange { --tile-accent:#ffb28d; background:linear-gradient(125deg,#3a2a28,#2a1e22); border-color:#895741; }
+.touch-console footer { margin-top:20px; padding-top:12px; font-size:9px; }
+.console-settings { display:grid; gap:18px; }
+.console-settings > * { margin:0; }
+@media(min-width:700px) and (min-height:700px) { .console-home .console-grid { min-height:calc(100svh - 290px); grid-template-rows:repeat(3,minmax(145px,1fr)); } }
+@media(max-width:900px) { .console-bar { padding:14px 24px; } .touch-console main { padding:22px 24px 14px; } .console-tile { padding:20px; } .console-tile-label { font-size:18px; } .console-tile-hint { font-size:11px; } }
+@media(max-width:699px) { .console-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .console-bar { padding:12px 16px; } .touch-console main { padding:20px 16px 12px; } .console-brand { font-size:14px; letter-spacing:1px; } .console-brand small { font-size:8px; } .console-mode { display:none; } .console-bar-actions { gap:6px; } .console-help-button span { display:none; } .console-home-button,.console-help-button { padding:10px; } .touch-console .page-heading { align-items:flex-start; flex-wrap:wrap; } .touch-console .page-heading h1 { font-size:27px; } .console-tile { min-height:148px; padding:18px 16px; } .console-tile-label { font-size:17px; max-width:calc(100% - 10px); } .console-tile-hint { font-size:11px; max-width:calc(100% - 12px); line-height:1.5; } .console-tile-code { right:12px; top:14px; } .console-tile-corner { right:12px; bottom:17px; } .tone-orange { grid-column:1 / -1; } }
+.touch-console.console-home footer { margin-top:12px; padding-bottom:12px; } .console-bar { position:sticky; top:0; z-index:15; }
+/* Consistent navigation and centered work surfaces. */
+.touch-console .form-panel { width:100%; max-width:760px; margin:0 auto; }
+.touch-console .console-back { display:inline-flex; align-items:center; justify-content:center; min-height:52px; min-width:140px; padding:12px 22px; margin:0 0 24px; font-size:16px; font-weight:600; border:1px solid #486575; border-radius:12px; background:#162b36; color:#e6f5fb; }
+.body-map svg.human-body { display:block; width:240px; max-width:100%; height:420px; margin:12px auto; }
+.human-body .body-part { fill:url(#body-surface); stroke:#92b7c9; }
+.human-body .body-part:hover,.human-body .body-part.selected { fill:#76d7d6; stroke:#ceffff; }
+.body-region-chips { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:12px 0 22px; }
+.body-region-chips button { min-height:44px; padding:10px 13px; border:1px solid #436171; border-radius:9px; background:#142d3a; }
+.body-region-chips button[aria-pressed="true"] { background:#72d6d8; color:#08222b; border-color:#b2f6f6; }
+.crew-overview-heading { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:24px; }
+.crew-overview-heading h2 { margin-bottom:8px; font-size:24px; }.crew-overview-heading p { color:#a7bdca; margin:0; }
+.crew-overview-heading button { min-height:52px; }
+.crew-roster { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:24px; }
+.crew-person { display:flex; flex-direction:column; align-items:flex-start; gap:7px; padding:20px; border:1px solid #345361; border-radius:14px; background:#102432; text-align:left; }
+.crew-person.selected { border-color:#89dfe3; box-shadow:inset 0 0 0 1px #89dfe3; background:#193944; }
+.crew-initials { display:grid; place-items:center; width:44px; height:44px; border-radius:50%; background:#305362; color:#baf5f0; font-weight:600; margin-bottom:4px; }
+.crew-person strong { font-size:18px; }.crew-person > span:not(.crew-initials),.crew-person small { color:#b0c3ce; }
+.crew-vitals { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:24px 0; }.crew-vitals div { padding:16px; background:#0b1d28; border-radius:10px; }.crew-vitals dt { color:#a6bdc9; font-size:12px; }.crew-vitals dd { margin:8px 0 0; font-size:22px; }.crew-detail > small { display:block; line-height:1.7; color:#a6bdc9; }
+@media(max-width:699px) { .crew-roster,.crew-vitals { grid-template-columns:repeat(2,minmax(0,1fr)); }.crew-overview-heading { align-items:flex-start; flex-direction:column; }.crew-person { padding:16px; }.crew-vitals dd { font-size:18px; } }
+/* NASA Space Apps palette and typography — May 2025 brand guide. */
+@font-face { font-family:Overpass; src:url('/fonts/overpass-latin-400-normal.woff2') format('woff2'); font-weight:400; font-display:swap; }
+@font-face { font-family:Overpass; src:url('/fonts/overpass-latin-700-normal.woff2') format('woff2'); font-weight:700; font-display:swap; }
+@font-face { font-family:'Fira Sans'; src:url('/fonts/fira-sans-latin-700-normal.woff2') format('woff2'); font-weight:700; font-display:swap; }
+@font-face { font-family:'Fira Sans'; src:url('/fonts/fira-sans-latin-900-normal.woff2') format('woff2'); font-weight:900; font-display:swap; }
+:root { --bg:#07173f; --panel:#07173f; --text:#fff; --muted:#bfd3f7; --cyan:#eafe07; --border:#2e96f5; }
+body { font-family:Overpass,Arial,sans-serif; }
+h1,h2,h3,.console-tile-label,.console-brand { font-family:'Fira Sans',Overpass,sans-serif; font-weight:700; }
+.touch-console { background:linear-gradient(135deg,#0042a6 0%,#07173f 100%); }
+.console-bar { background:#07173f; border-color:#2e96f5; }
+.console-brand { color:#fff; }.console-brand > svg { color:#eafe07; }.console-brand small,.console-mode { color:#bfd3f7; }
+.console-tile,.tone-green,.tone-violet,.tone-orange { --tile-accent:#eafe07; background:#07173f; border-color:#2e96f5; }
+.console-tile:hover { background:#0042a6; }.console-tile-hint,.console-tile-code { color:#bfd3f7; }.console-tile-label { color:#fff; }
+.console-tile-code { letter-spacing:1px; }.console-tile::after { opacity:.2; }
+.touch-console .panel,.crew-person,.crew-detail,.body-map,.crew-vitals div { background:#07173f; border-color:#2e96f5; }
+.crew-person.selected { background:#0042a6; border-color:#eafe07; box-shadow:inset 0 0 0 1px #eafe07; }
+.crew-initials { background:#0042a6; color:#fff; }.crew-person.selected .crew-initials { background:#07173f; }
+.touch-console .primary { background:#eafe07; color:#07173f; border-color:#eafe07; font-weight:700; }
+.touch-console .secondary,.touch-console .console-back,.body-region-chips button { background:#0042a6; color:#fff; border-color:#2e96f5; }
+.body-region-chips button[aria-pressed="true"] { background:#eafe07; color:#07173f; border-color:#eafe07; }
+.human-body .body-part.selected { fill:#eafe07; stroke:#fff; }
+.touch-console .page-heading p,.crew-overview-heading p,.crew-person > span:not(.crew-initials),.crew-person small,.crew-vitals dt,.crew-detail > small,.body-map small { color:#bfd3f7; }
+.touch-console .eyebrow,.touch-console footer,.touch-console .system-status { color:#bfd3f7; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline-color:#eafe07; }
+.touch-console .instruction,.touch-console .measurement-instructions,.touch-console .assessment,.touch-console .notice,.touch-console .alert,.touch-console input,.touch-console select,.touch-console textarea,.touch-console .daily-routine,.touch-console .mood-options label { background:#07173f; }
+.touch-console .instruction,.touch-console .measurement-instructions { border-color:#2e96f5; color:#fff; }
+/* Official supplied color/black logo stays unchanged on a white clear-space panel. */
+.space-apps-logo { padding:14px 18px; background:#fff; border-radius:4px; flex-shrink:0; }
+.space-apps-logo img { display:block; width:140px; height:auto; }
+.touch-console .console-back { width:56px; min-width:56px; height:56px; min-height:56px; padding:0; border-radius:50%; box-shadow:0 3px 10px #0002; }
+.touch-console .console-back:hover { background:#0960e1; }
+@media(max-width:699px) { .space-apps-logo { padding:10px 12px; }.space-apps-logo img { width:110px; }.console-brand { font-size:13px; }.console-brand small { font-size:7px; letter-spacing:1px; }.console-brand > svg { display:none; } }
+/* Header logo uses the supplied light colorway directly on Deep Blue. */
+.space-apps-logo { background:transparent; padding:8px 0 8px 20px; border-radius:0; }
+.space-apps-logo img { width:160px; height:auto; }
+.touch-console .page-heading .console-back { margin:0 0 0 auto; flex-shrink:0; }
+.device-cache-status { padding:20px; border:1px solid #2e96f5; border-radius:12px; background:#07173f; }
+.device-cache-status p { margin:8px 0 0; color:#bfd3f7; }
+@media(max-width:699px) { .space-apps-logo { padding:8px 0 8px 12px; }.space-apps-logo img { width:120px; }.touch-console .page-heading { flex-wrap:nowrap; align-items:center; }.touch-console .page-heading > div { min-width:0; }.touch-console .page-heading h1 { overflow-wrap:anywhere; } }
+/* Quiet space environment: static stars, subtle surfaces, gentle feedback. */
+:root { --bg:#040915; --panel:transparent; --border:#ffffff1a; --muted:#bcc9dc; }
+body { background:#040915; }
+.touch-console { background-color:#040915; background-image:linear-gradient(180deg,#04091533,#04091566),url('/brand/deep-space-background.svg'); background-size:auto,cover; background-position:center; background-attachment:fixed; }
+.console-bar { background:#040915b8; backdrop-filter:blur(18px); border:0; }
+.touch-console .page-heading { flex-direction:row-reverse; justify-content:space-between; align-items:center; }
+.touch-console .page-heading > div { text-align:right; }
+.touch-console.console-home .page-heading { flex-direction:row; }.touch-console.console-home .page-heading > div { text-align:left; }
+.touch-console .page-heading .console-back { margin:0 auto 0 0; }
+.touch-console .panel,.touch-console .body-map,.touch-console .crew-detail,.touch-console .device-cache-status,.touch-console .console-settings,.touch-console .daily-routine,.touch-console .instruction,.touch-console .measurement-instructions { background:transparent; border:0; box-shadow:none; }
+.touch-console .panel { border-radius:0; }
+.touch-console .console-tile,.touch-console .crew-person,.touch-console .crew-vitals div,.touch-console .assessment,.touch-console .guide-card { border:0; background:#b9d5ff06; box-shadow:none; }
+.touch-console .console-tile::after,.console-tile-code,.console-tile-corner { display:none; }
+.touch-console .console-tile { border-radius:20px; }
+.console-tile-icon { color:#c4d7ee; }
+.touch-console .console-tile:hover,.touch-console .crew-person:hover { background:#c4daff0e; box-shadow:0 0 35px #9ac4ff0a; transform:translateY(-3px); }
+.touch-console .crew-person.selected { background:#c4daff12; box-shadow:inset 3px 0 #eafe07; }
+.touch-console .crew-initials { background:#bdd9ff14; }
+.touch-console .console-tile:active,.touch-console .crew-person:active { background:#c4daff1c; transform:translateY(-1px) scale(.99); }
+.touch-console button { transition:background-color .3s ease,box-shadow .3s ease,transform .3s ease,color .3s ease; }
+.touch-console button:active { filter:brightness(1.14); }
+.touch-console .secondary,.touch-console .console-back { background:#c5daff0c; border:0; box-shadow:none; }
+.touch-console .secondary:hover,.touch-console .console-back:hover { background:#c5daff20; box-shadow:0 0 24px #92c2ff12; }
+.touch-console input,.touch-console select,.touch-console textarea,.touch-console .mood-options label { background:#050b18a6; border:1px solid #bdcde51c; }
+.touch-console .assessment { border-left:2px solid #a7bfd3; }.touch-console .assessment.urgent { border-left-color:#ffad87; }.touch-console .alert { background:#38241b60; border:0; border-left:3px solid #ffad87; }.touch-console .notice { background:#17322c66; border:0; border-left:3px solid #a5dac9; }
+.touch-console .form-panel { padding:24px 0; }.touch-console footer { border:0; opacity:.85; }.touch-console .eyebrow { color:#a3b5cc; }
+.touch-console .page-heading h1 { font-weight:700; }.touch-console .body-map { padding-top:0; }
+.touch-console main { animation:console-arrive .38s ease-out both; }
+@keyframes console-arrive { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+::view-transition-group(root) { animation-duration:.36s; animation-timing-function:ease-in-out; }
+::view-transition-old(root),::view-transition-new(root) { animation-duration:.36s; }
+@media(hover:none) { .touch-console .console-tile:hover,.touch-console .crew-person:hover { transform:none; } }
+@media(prefers-reduced-motion:reduce) { .touch-console main { animation:none; }.touch-console button { transition:none; }.touch-console .console-tile:hover,.touch-console .console-tile:active,.touch-console .crew-person:hover,.touch-console .crew-person:active { transform:none; }::view-transition-group(*),::view-transition-old(*),::view-transition-new(*) { animation:none!important; } }
+.touch-console.emergency-mode .workspace { background:transparent; }

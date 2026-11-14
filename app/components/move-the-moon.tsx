@@ -22,7 +22,7 @@ export default function MoveTheMoon() {
     if (document.fullscreenElement) return;
     const fallback = () =>
       setFullscreenNote(
-        "Full-window mode is active. Install Crew Health on your home screen to hide browser controls.",
+        "Full-window mode is active. Install Deep Space Health on your home screen to hide browser controls.",
       );
     if (stage.current?.requestFullscreen)
       void stage.current.requestFullscreen().catch(fallback);
@@ -38,18 +38,18 @@ export default function MoveTheMoon() {
   }
   return (
     <section className="panel moon-room">
-      <div className="eyebrow">RECREATION DECK · YOUR ORIGINAL GAME</div>
+      <div className="eyebrow">RECREATION · OFFLINE GAME</div>
       <h2>Move the Moon</h2>
       <p>
-        A moment away from the mission. Your game’s original planets, sounds,
-        shop, and local scores are bundled here for offline play.
+        Game artwork, audio, shop, and local scores are bundled here for offline
+        play.
       </p>
       <p id="moon-controls">
         Drag around Earth to move the Moon and block incoming asteroids. Click
         the game to focus it; left / right arrow keys move the Moon, and Space
-        or Escape pauses. Your original Peace mode is available through the
-        game’s Earth interaction. Sound starts muted; use the game’s sound
-        controls to enable it.
+        or Escape pauses. Peace mode is available through the game’s Earth
+        interaction. Sound starts muted; use the game’s sound controls to enable
+        it.
       </p>
       <button
         ref={launch}
@@ -69,7 +69,7 @@ export default function MoveTheMoon() {
           width="150"
           height="150"
         />
-        <h3>Your Moon. Your orbit.</h3>
+        <h3>Game controls</h3>
         <p>Drag with your finger or mouse. Play in portrait or landscape.</p>
       </div>
       <dialog
@@ -124,7 +124,7 @@ export default function MoveTheMoon() {
         Closing the game ends the current run. Scores, coins, and equipped items
         save locally in this browser; progress from the original PC or phone
         game is not imported. Offline play is available after OFFLINE READY
-        appears. Install Crew Health on your home screen to play without browser
+        appears. Install Deep Space Health on your home screen to play without browser
         controls.
       </p>
     </section>

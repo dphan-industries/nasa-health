@@ -1,4 +1,11 @@
-# Crew Health Companion
+# Deep Space Health Systems Companion
+
+The current interface uses a tablet-first **Mission home**: nine large controls on one screen, inspired by a seatback monitor. Open Record vitals, Health check, Crew overview, Wellbeing, Connect a device, Field guide, Move the Moon, Device & data, or Emergency assist. Large **Back** controls return to the previous screen; top-right Home and emergency buttons have been removed. Install, reminders, and report backup/import are grouped under **Device & data**. The earlier screenshots below document individual features and the previous dashboard layout.
+
+![Deep Space Health tablet mission home](docs/screenshots/30-phantasy-brand-console.png)
+
+The **Crew overview** uses six fictional training profiles, separate from this browser’s saved history. The vitals form is centered, and wellbeing uses a body-area menu. [Branding, font licenses, crew-data scope, and updated screenshots](docs/BRANDING.md) document the Space Apps visual system.
+
 
 A space-themed, offline-first health journal and recreation prototype built with Next.js and React. The fictional Asteria mission console brings together manual readings, trends, wellbeing notes, a guide library, device connections, and David’s **Move the Moon** game.
 
@@ -22,8 +29,8 @@ A space-themed, offline-first health journal and recreation prototype built with
 Open a terminal and run:
 
 ```sh
-git clone https://github.com/dphan-industries/phanhealth.git
-cd phanhealth
+git clone https://github.com/dphan-industries/nasa-health.git
+cd nasa-health
 npm ci
 ```
 
@@ -70,7 +77,7 @@ All screenshots below are real captures of the local app, taken in a separate pr
 
 ![Dashboard and navigation](docs/screenshots/01-dashboard.jpg)
 
-The left navigation opens Measurements, Health history, Offline guides, Wearables, Wellbeing, and Move the Moon. The dashboard combines quick links with the latest heart-rate and blood-pressure cards, daily check-in progress, and the guide-library shortcut. **SAMPLE** identifies fictional starting readings; those are not measurements from a connected watch. A completed daily check-in means entries were recorded, not that someone passed a health assessment.
+The Mission home grid opens every feature directly; the former sidebar has been removed. The dashboard combines quick links with the latest heart-rate and blood-pressure cards, daily check-in progress, and the guide-library shortcut. **SAMPLE** identifies fictional starting readings; those are not measurements from a connected watch. A completed daily check-in means entries were recorded, not that someone passed a health assessment.
 
 The top status distinguishes verified **OFFLINE READY** from a preload or cache warning. The connection indicator reflects the browser’s network report; it does not establish that a remote service is reachable. Mission day, vessel location, crew identity, and spacecraft artwork are fictional presentation elements, not live spacecraft telemetry. Emergency assist opens the training workflow described below.
 
@@ -313,3 +320,9 @@ A server-stopped check confirmed that the cached application and game reopened w
 ### Privacy
 
 No user account or automatic health-data upload is part of the app. Explicitly connected real sensors can supply real values; those stay in the browser unless exported. Reports are unencrypted and may contain sensitive observations. External links receive ordinary browser request information when opened; the app does not attach health records to them. Use fictional records when demonstrating or taking screenshots.
+
+Current interface: plain feature descriptions, no promotional slogans, arrow-only Back navigation, and [crew records preview](screenshots/31-plain-crew-records.png).
+
+Back is placed at the left of the page heading; the title is aligned to the right. Offline availability is shown in Device & data instead of beside every page title.
+
+The current theme uses a dim, static SVG starfield and transparent reading surfaces. Navigation controls have subtle touch/hover feedback, and supported browsers crossfade screen changes in 360 ms. Reduced-motion preferences disable screen movement. The background is cached for offline use. [Home preview](docs/screenshots/33-relaxed-space-home.png) · [Vitals preview](docs/screenshots/34-seamless-vitals.png).

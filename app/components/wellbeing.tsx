@@ -117,38 +117,13 @@ export default function Wellbeing({
       setBusy(false);
     }
   }
-  function bodyPart(name: string, path: string) {
-    return (
-      <g
-        key={name}
-        role="button"
-        tabIndex={0}
-        aria-label={`Select ${name.toLowerCase()}`}
-        aria-pressed={area === name}
-        onClick={() => setArea(name)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setArea(name);
-          }
-        }}
-      >
-        <path
-          d={path}
-          className={area === name ? "body-part selected" : "body-part"}
-        />
-      </g>
-    );
-  }
   return (
     <section className="panel wellbeing">
       <div className="eyebrow">PERSONAL LOG · FICTIONAL CHECK-IN</div>
-      <h2>More than a number.</h2>
+      <h2>Sleep, mood and observations</h2>
       <p>
-        Log sleep over the last 24 hours, choose your current mood, and add a
-        body-area observation. Consistent records can help you notice changes in
-        rest, mood, and comfort. These are personal notes, not a diagnostic
-        questionnaire. Review persistent changes with the crew medical officer.
+        Record sleep, mood and body-area observations. Review persistent changes
+        with the crew medical officer.
       </p>
       {error && (
         <div className="alert" role="alert">
@@ -259,73 +234,62 @@ export default function Wellbeing({
           </button>
         </div>
         <div className="body-map">
-          <h3>Where would you like to add a note?</h3>
-          <p>Select an area. No medical interpretation is generated.</p>
-          <svg viewBox="0 0 240 340" aria-label="Body-area selector">
-            <g fill="none" stroke="#80dae0" strokeWidth="1.5">
-              {bodyPart("Head", "M101 45a19 19 0 1 0 38 0 19 19 0 1 0-38 0")}
-              {bodyPart("Chest", "M98 75h44l10 75H88z")}
-              {bodyPart("Abdomen", "M88 154h64l-5 51H93z")}
-              {bodyPart("Right arm", "M84 80l-20 8-20 110 20 5 24-87z")}
-              {bodyPart("Left arm", "M156 80l20 8 20 110-20 5-24-87z")}
-              {bodyPart("Right leg", "M94 210h23l-6 112H86z")}
-              {bodyPart("Left leg", "M123 210h23l8 112h-25z")}
-            </g>
-          </svg>
+          <h3>Body-area observation</h3>
+          <p>Choose an area to record discomfort or another observation.</p>
           <label>
-            Selected area
+            Body area
             <select value={area} onChange={(e) => setArea(e.target.value)}>
               {areas.map((a) => (
                 <option key={a}>{a}</option>
               ))}
             </select>
           </label>
-          <small>
-            Left and right are the illustrated person’s perspective.
-          </small>
-          <div className="instruction" aria-live="polite">
-            <strong>{area}: function and monitoring</strong>
-            <p>
-              {bodyEducation[area] ||
-                "Bones and muscles support movement and strength. Altered gravity changes their loading. Record discomfort and prescribed exercise completion; pain notes and exercise minutes cannot measure bone density or diagnose bone loss."}
-            </p>
-            <p>
-              Status: self-reported observations and the latest relevant
-              recorded values below; no diagnosis is generated.
-            </p>
-            {vitals
-              .filter(
-                (r) =>
-                  r.source !== "Simulated sensor" &&
-                  (area === "Chest"
-                    ? ["Heart rate", "Blood pressure"].includes(r.kind)
-                    : area === "Head"
-                      ? r.kind === "Body temperature"
-                      : area === "Abdomen"
-                        ? r.kind === "Blood glucose"
-                        : false),
-              )
-              .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-              .filter(
-                (r, i, arr) => arr.findIndex((x) => x.kind === r.kind) === i,
-              )
-              .map((r) => (
-                <p key={r.id}>
-                  <strong>
-                    {r.kind}: {r.value} {r.unit}
-                  </strong>
-                  <br />
-                  {assessReading(r).title} ·{" "}
-                  {new Date(r.timestamp).toLocaleString()} · {r.source}
-                </p>
-              ))}
-            <a href={SOURCES.nasa} target="_blank" rel="noreferrer">
-              NASA health-risk reference ↗
-            </a>
-          </div>
+          <small>Left and right refer to your own body.</small>
+          {area !== "No area" && (
+            <div className="instruction" aria-live="polite">
+              <strong>{area}: function and monitoring</strong>
+              <p>
+                {bodyEducation[area] ||
+                  "Bones and muscles support movement and strength. Altered gravity changes their loading. Record discomfort and prescribed exercise completion; pain notes and exercise minutes cannot measure bone density or diagnose bone loss."}
+              </p>
+              <p>
+                Status: self-reported observations and the latest relevant
+                recorded values below; no diagnosis is generated.
+              </p>
+              {vitals
+                .filter(
+                  (r) =>
+                    r.source !== "Simulated sensor" &&
+                    (area === "Chest"
+                      ? ["Heart rate", "Blood pressure"].includes(r.kind)
+                      : area === "Head"
+                        ? r.kind === "Body temperature"
+                        : area === "Abdomen"
+                          ? r.kind === "Blood glucose"
+                          : false),
+                )
+                .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+                .filter(
+                  (r, i, arr) => arr.findIndex((x) => x.kind === r.kind) === i,
+                )
+                .map((r) => (
+                  <p key={r.id}>
+                    <strong>
+                      {r.kind}: {r.value} {r.unit}
+                    </strong>
+                    <br />
+                    {assessReading(r).title} ·{" "}
+                    {new Date(r.timestamp).toLocaleString()} · {r.source}
+                  </p>
+                ))}
+              <a href={SOURCES.nasa} target="_blank" rel="noreferrer">
+                NASA health-risk reference ↗
+              </a>
+            </div>
+          )}
         </div>
       </div>
-      <h3 className="subheading">Your wellbeing journal</h3>
+      <h3 className="subheading">Saved wellbeing check-ins</h3>
       <p>
         <strong>Routine participation:</strong>{" "}
         {

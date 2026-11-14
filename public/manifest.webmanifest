@@ -1,6 +1,6 @@
 {
-  "name": "Crew Health Companion",
-  "short_name": "Crew Health",
+  "name": "Deep Space Health Systems",
+  "short_name": "Deep Space Health",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#080e16",
@@ -27,5 +27,5 @@
   ],
   "id": "/",
   "scope": "/",
-  "description": "Your offline crew health console and relaxation space."
+  "description": "Offline crew health and wellbeing prototype for NASA Space Apps."
 }

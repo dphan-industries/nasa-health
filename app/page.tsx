@@ -1,4 +1,6 @@
 "use client";
+import Image from "next/image";
+import { flushSync } from "react-dom";
 import { useEffect, useState, useRef, useMemo } from "react";
 import {
   Reading,
@@ -13,6 +15,7 @@ import NumberControl from "./components/number-control";
 import Trends, { ReadingInsight } from "./components/trends";
 import Wearables, { type SensorReading } from "./components/wearables";
 import MoveTheMoon from "./components/move-the-moon";
+import CrewOverview from "./components/crew-overview";
 import Wellbeing from "./components/wellbeing";
 import Reminders from "./components/reminders";
 import DataTransfer from "./components/data-transfer";
@@ -21,7 +24,7 @@ import MissionHealth from "./components/mission-health";
 import EmergencyGuide from "./components/emergency-guide";
 import MeasurementInstructions from "./components/measurement-instructions";
 import { METRICS, UNITS, assessReading } from "../lib/health";
-import { orderedReadings, values } from "../lib/insights";
+import { orderedReadings } from "../lib/insights";
 import { samples, guides } from "../lib/content";
 type View =
   | "Dashboard"
@@ -32,7 +35,9 @@ type View =
   | "Wearables"
   | "Wellbeing"
   | "Move the Moon"
-  | "Mission health";
+  | "Mission health"
+  | "Device & data"
+  | "Crew overview";
 export default function Home() {
   const [view, setView] = useState<View>("Dashboard");
   const [historyPage, setHistoryPage] = useState(0);
@@ -61,22 +66,11 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState(0);
   const [guide, setGuide] = useState<number | null>(null);
-  const [date, setDate] = useState("04 NOV 2026");
   const dirty = !!(first || second || note || measurementContext || extraDirty);
   const ready = cacheReady && storageReady;
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
     queueMicrotask(() => {
-      setDate(
-        new Date()
-          .toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            timeZone: "UTC",
-          })
-          .toUpperCase(),
-      );
       update();
     });
     window.addEventListener("online", update);
@@ -111,6 +105,16 @@ export default function Home() {
     heading.current?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }, [view]);
+  function showView(next: View) {
+    if (
+      document.startViewTransition &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      document.startViewTransition(() => {
+        flushSync(() => setView(next));
+      });
+    } else setView(next);
+  }
   function navigate(next: View, track = true) {
     if (dirty && !window.confirm("Discard unsaved entries and notes?"))
       return false;
@@ -126,7 +130,7 @@ export default function Home() {
     setExtraDirty(false);
     if (track && next !== view)
       setViewHistory((previous) => [...previous, view]);
-    setView(next);
+    showView(next);
     setError("");
     setNotice("");
     return true;
@@ -163,7 +167,7 @@ export default function Home() {
       setMeasurementContext("");
       setReview(false);
       setViewHistory((previous) => [...previous, view]);
-      setView("Health history");
+      showView("Health history");
       setNotice("Reading saved on this device.");
     } catch (e) {
       setError((e as Error).message);
@@ -249,11 +253,6 @@ export default function Home() {
     setEntryDevice(r.device);
     setReview(true);
   }
-  const today = records.filter(
-    (r) =>
-      new Date(r.timestamp).toDateString() === new Date().toDateString() &&
-      ["Heart rate", "Blood pressure"].includes(r.kind),
-  );
   const historyRows = useMemo(
     () =>
       [...records, ...samples].sort(
@@ -269,131 +268,59 @@ export default function Home() {
     }
     return result;
   }, [records]);
-  const latest = (k: string) =>
-    [...records]
-      .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-      .find((r) => r.kind === k) || samples.find((r) => r.kind === k)!;
   return (
     <div
-      className={`app-shell ${view === "Emergency assist" ? "emergency-mode" : ""}`}
+      className={`app-shell touch-console ${view === "Dashboard" ? "console-home" : ""} ${view === "Emergency assist" ? "emergency-mode" : ""}`}
     >
       <a className="skip" href="#main">
         Skip to content
       </a>
-      <aside className="sidebar">
-        <a
-          className="brand"
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("Dashboard");
-          }}
-        >
-          <span className="brand-mark">
-            <Icon name="planet" size={30} />
-          </span>
-          <span>
-            CREW<span className="brand-small">HEALTH COMPANION</span>
-          </span>
-        </a>
-        <div className="mission-tag">
-          <i /> ASTERIA EXPEDITION <span>07</span>
-        </div>
-        <p className="nav-label">FLIGHT CONSOLE</p>
-        <nav>
-          {(
-            [
-              "Dashboard",
-              "Measurements",
-              "Health history",
-              "Offline guides",
-              "Wearables",
-              "Wellbeing",
-              "Move the Moon",
-              "Mission health",
-            ] as const
-          ).map((v, i) => (
-            <button
-              key={v}
-              className={`nav-item ${view === v ? "active" : ""}`}
-              onClick={() => navigate(v)}
-            >
-              <Icon name={v} />
-              <span>{v}</span>
-              <small>0{i + 1}</small>
-            </button>
-          ))}
-        </nav>
-        <div className="side-bottom">
-          <div className="connection">
-            <span className="signal">▂▄▆</span>
-            <div>
-              DEEP SPACE NETWORK
-              <small>
-                {online ? "Browser reports online" : "Device offline"} · local
-                mode
-              </small>
-            </div>
-          </div>
-          <button
-            className="emergency"
-            onClick={() => navigate("Emergency assist")}
-          >
-            <Icon name="Emergency assist" /> Emergency assist <span>↗</span>
-          </button>
-          <small className="sim-note">SIMULATED PROTOCOL ONLY</small>
-          <div className="crew">
-            <div className="avatar">AC</div>
-            <div>
-              Alex Chen<small>Mission specialist · Crew 04</small>
-            </div>
-            <span className="crew-dot" />
-          </div>
-        </div>
-      </aside>
       <div className="workspace">
-        <header className="topbar">
-          <div>
-            <span className="cross">✦</span> ASTERIA{" "}
-            <span className="divider">/</span> CREW HEALTH SYSTEMS
-          </div>
-          <div className="top-right">
-            <span className="prototype">PROTOTYPE</span>
-            <span>{date}</span>
-            <Icon name="clock" size={16} />
-            <span>UTC</span>
+        <header className="console-bar">
+          <button
+            className="console-brand"
+            onClick={() => navigate("Dashboard")}
+            aria-label="Deep Space Health Systems main screen"
+          >
+            <Icon name="planet" size={30} />
+            <span>
+              DEEP SPACE<small>HEALTH SYSTEMS · CREW CONSOLE</small>
+            </span>
+          </button>
+          <div className="console-bar-actions">
+            <div className="space-apps-logo">
+              <Image
+                unoptimized
+                src="/brand/space-apps-color-white.svg"
+                alt="NASA Space Apps Challenge"
+                width={561}
+                height={221}
+              />
+            </div>
           </div>
         </header>
-        <main id="main">
+        <main id="main" key={view}>
           <div className="page-heading">
             <div>
               <div className="eyebrow">
-                MISSION DAY 142 <span> / </span> MEDICAL DECK
+                DEEP SPACE <span> / </span> HEALTH SYSTEMS
               </div>
               <h1 ref={heading} tabIndex={-1}>
-                {view === "Dashboard" ? "Your health. Mission critical." : view}
+                {view === "Dashboard" ? "Mission home" : view}
               </h1>
-              <p>
-                {view === "Dashboard"
-                  ? "A little check-in. A stronger mission. Let’s keep you flight-ready."
-                  : "Your personal health console, wherever the mission takes you."}
-              </p>
+              <p>{view === "Dashboard" ? "Choose what you need." : ""}</p>
             </div>
-            <span className="system-status">
-              <i />
-              {ready
-                ? "OFFLINE READY"
-                : online
-                  ? "CONNECTED · PRELOAD REQUIRED"
-                  : "OFFLINE · CACHE UNVERIFIED"}
-            </span>
+            {view !== "Dashboard" && (
+              <button
+                className="back console-back"
+                onClick={goBack}
+                aria-label="Back"
+                title="Back"
+              >
+                <Icon name="back" size={26} />
+              </button>
+            )}
           </div>
-          <InstallApp ready={ready} />
-          {view !== "Dashboard" && (
-            <button className="back" onClick={goBack}>
-              ← Back to {viewHistory.at(-1)?.toLowerCase() ?? "dashboard"}
-            </button>
-          )}
           {offlineError && (
             <div className="alert" role="alert">
               {offlineError}
@@ -415,254 +342,117 @@ export default function Home() {
             </div>
           )}
           {view === "Dashboard" && (
-            <>
-              <section className="hero">
-                <div className="hero-copy">
-                  <div className="eyebrow">
-                    <span className="live-dot" /> PERSONAL HEALTH OVERVIEW
-                  </div>
-                  <h2>
-                    One crew.
-                    <br />
-                    One extraordinary journey.
-                  </h2>
-                  <p>
-                    Your next frontier starts with you.
-                    <br />
-                    Check in, track your vitals, and stay prepared.
-                  </p>
-                  <button
-                    className="primary"
-                    onClick={() => navigate("Measurements")}
-                  >
-                    Start daily check-in <Icon name="arrow" size={18} />
-                  </button>
-                  <div className="hero-foot">
-                    <Icon name="shield" size={14} /> PRIVATE BY DESIGN <b>·</b>{" "}
-                    STORED ON YOUR DEVICE
-                  </div>
-                </div>
-                <div className="orbital" aria-hidden="true">
-                  <div className="orbit orbit-one" />
-                  <div className="orbit orbit-two" />
-                  <div className="orbit orbit-three" />
-                  <div className="planet">
-                    <div className="planet-grid" />
-                    <div className="planet-shine" />
-                  </div>
-                  <span className="orbit-point" />
-                  <div className="planet-label">
-                    VESSEL POSITION <b>28.4° N / 81.6° W</b>
-                  </div>
-                  <div className="orbital-top">
-                    ✧ &nbsp; ASTERIA / EXPLORATION CLASS
-                  </div>
-                </div>
-                <span className="hero-number">SYS. 01 / HEALTH</span>
-              </section>
-              <div className="launch-grid">
-                {(
-                  [
-                    "Measurements",
-                    "Health history",
-                    "Offline guides",
-                    "Wearables",
-                    "Wellbeing",
-                    "Move the Moon",
-                    "Mission health",
-                  ] as const
-                ).map((destination) => (
-                  <button
-                    key={destination}
-                    onClick={() => navigate(destination)}
-                  >
-                    <Icon name={destination} />
-                    <span>
-                      {destination}
-                      <small>
-                        {
-                          {
-                            Measurements: "Tap to record a reading",
-                            "Health history": "Trends and explained flags",
-                            "Offline guides": "Your onboard field manual",
-                            Wearables: "Bluetooth or simulated sensors",
-                            Wellbeing: "Sleep, mood and body notes",
-                            "Move the Moon": "Your game. A moment away.",
-                            "Mission health": "Assess, act, and follow up",
-                          }[destination]
-                        }
-                      </small>
-                    </span>
-                    <Icon name="arrow" size={16} />
-                  </button>
-                ))}
-              </div>
-              <div className="section-heading">
-                <h2>
-                  Vital signs <span>YOUR LATEST READINGS</span>
-                </h2>
-                <button onClick={() => navigate("Health history")}>
-                  View health history <Icon name="arrow" size={16} />
-                </button>
-              </div>
-              <div className="vitals">
-                {["Heart rate", "Blood pressure"].map((k, i) => {
-                  const r = latest(k);
-                  return (
-                    <button
-                      className="vital-card"
-                      key={k}
-                      onClick={() => {
-                        if (navigate("Measurements"))
-                          setKind(k as Reading["kind"]);
-                      }}
-                    >
-                      <div className="vital-title">
-                        <span className={`metric-icon metric-${i}`}>
-                          <Icon name={i ? "drop" : "heart"} />
-                        </span>
-                        {k}
-                        <span className="sample-tag">
-                          {r.id.startsWith("sample")
-                            ? "SAMPLE"
-                            : r.source === "Manual entry"
-                              ? "MANUAL"
-                              : r.source === "Simulated sensor"
-                                ? "SIMULATED"
-                                : "BLUETOOTH"}
-                        </span>
-                      </div>
-                      <div className="vital-value">
-                        {r.value}
-                        <span>{r.unit}</span>
-                        <svg
-                          className="spark"
-                          viewBox="0 0 160 48"
-                          aria-hidden="true"
-                        >
-                          <polyline
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            points={orderedReadings(
-                              [...samples, ...records],
-                              k as Reading["kind"],
-                            )
-                              .slice(-12)
-                              .map((item, index, array) => {
-                                const v = values(item)[0];
-                                const nums = array.map((a) => values(a)[0]);
-                                const min = Math.min(...nums) - 2,
-                                  max = Math.max(...nums) + 2;
-                                return (
-                                  (array.length === 1
-                                    ? 80
-                                    : (index / (array.length - 1)) * 155) +
-                                  "," +
-                                  (42 - ((v - min) / (max - min)) * 36)
-                                );
-                              })
-                              .join(" ")}
-                          />
-                        </svg>
-                      </div>
-                      <div className="metric-footer">
-                        <span>
-                          ◇{" "}
-                          {r.id.startsWith("sample")
-                            ? "Fictional reference"
-                            : "Recorded on device"}
-                        </span>
-                        <time>
-                          {new Date(r.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </time>
-                      </div>
-                    </button>
-                  );
-                })}
-                <div className="checkin-card">
-                  <div className="vital-title">
-                    <span className="metric-icon">
-                      <Icon name="check" />
-                    </span>
-                    Daily check-in
-                  </div>
-                  <div className="check-count">
-                    {new Set(today.map((r) => r.kind)).size}
-                    <span>/ 2 complete</span>
-                    <div className="progress-ring">
-                      {Math.round(
-                        (new Set(today.map((r) => r.kind)).size / 2) * 100,
-                      )}
-                      <small>%</small>
-                    </div>
-                  </div>
-                  <div className="progress-track">
-                    <span
-                      style={{
-                        width: `${new Set(today.map((r) => r.kind)).size * 50}%`,
-                      }}
-                    />
-                  </div>
-                  <small>A small routine. A vital difference.</small>
-                </div>
-              </div>
-              <div className="lower-grid">
-                <section className="panel checklist">
-                  <div className="section-heading">
-                    <h2>Today’s mission</h2>
-                    <span className="tag">DAILY CHECK-IN</span>
-                  </div>
-                  <p>Make time for your most important system. You.</p>
-                  {["Heart rate", "Blood pressure"].map((k, i) => (
-                    <button
-                      key={k}
-                      className="task"
-                      onClick={() => {
-                        if (navigate("Measurements"))
-                          setKind(k as Reading["kind"]);
-                      }}
-                    >
-                      <span
-                        className={`task-box ${today.some((r) => r.kind === k) ? "done" : ""}`}
-                      >
-                        {today.some((r) => r.kind === k) ? "✓" : ""}
-                      </span>
-                      <div>
-                        Record {k.toLowerCase()}
-                        <small>
-                          {i
-                            ? "A clearer picture of your circulation"
-                            : "A moment to check your rhythm"}
-                        </small>
-                      </div>
-                      <span className="task-time">{i ? "3" : "2"} MIN</span>
-                      <Icon name="arrow" size={17} />
-                    </button>
-                  ))}
-                </section>
-                <section className="panel guide-panel">
-                  <div className="eyebrow">KNOWLEDGE, WITHIN REACH</div>
-                  <div className="guide-orbit">
-                    <Icon name="Offline guides" size={44} />
-                  </div>
-                  <h2>Prepared for the unexpected.</h2>
-                  <p>
-                    Your onboard library. Measurement instructions and simulated
-                    mission protocols, wherever you are.
-                  </p>
-                  <button onClick={() => navigate("Offline guides")}>
-                    Explore offline guides <Icon name="arrow" size={17} />
-                  </button>
-                  <span className="available">
-                    <i /> 3 BUNDLED GUIDES
+            <nav className="console-grid" aria-label="All features">
+              {(
+                [
+                  {
+                    view: "Measurements",
+                    label: "Record vitals",
+                    hint: "Pulse · pressure · more",
+                    tone: "cyan",
+                  },
+                  {
+                    view: "Mission health",
+                    label: "Health check",
+                    hint: "Assess & take action",
+                    tone: "cyan",
+                  },
+                  {
+                    view: "Crew overview",
+                    label: "Crew overview",
+                    hint: "Crew data & my history",
+                    tone: "cyan",
+                  },
+                  {
+                    view: "Wellbeing",
+                    label: "Wellbeing",
+                    hint: "Sleep · mood · body",
+                    tone: "green",
+                  },
+                  {
+                    view: "Wearables",
+                    label: "Connect a device",
+                    hint: "Sensors & wearables",
+                    tone: "green",
+                  },
+                  {
+                    view: "Offline guides",
+                    label: "Field guide",
+                    hint: "How to measure & respond",
+                    tone: "green",
+                  },
+                  {
+                    view: "Move the Moon",
+                    label: "Move the Moon",
+                    hint: "Offline game",
+                    tone: "violet",
+                  },
+                  {
+                    view: "Device & data",
+                    label: "Device & data",
+                    hint: "Install · reminders · backup",
+                    tone: "violet",
+                  },
+                  {
+                    view: "Emergency assist",
+                    label: "Emergency assist",
+                    hint: "Response rehearsal",
+                    tone: "orange",
+                  },
+                ] as const
+              ).map((item, index) => (
+                <button
+                  key={item.view}
+                  className={"console-tile tone-" + item.tone}
+                  onClick={() => navigate(item.view)}
+                >
+                  <span className="console-tile-code" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")} /
                   </span>
-                </section>
+                  <span className="console-tile-icon">
+                    <Icon name={item.view} size={36} />
+                  </span>
+                  <span className="console-tile-label">{item.label}</span>
+                  <span className="console-tile-hint">{item.hint}</span>
+                  <span className="console-tile-corner" aria-hidden="true">
+                    ↗
+                  </span>
+                </button>
+              ))}
+            </nav>
+          )}
+          {view === "Crew overview" && (
+            <CrewOverview
+              recordCount={records.length}
+              onHistory={() => navigate("Health history")}
+            />
+          )}
+          {view === "Device & data" && (
+            <section
+              className="console-settings"
+              aria-label="Device settings and data"
+            >
+              <div className="device-cache-status" role="status">
+                <strong>Offline availability</strong>
+                <p>
+                  {ready
+                    ? "Ready for offline use on this device."
+                    : online
+                      ? "Connected. Keep the app open until local resources finish downloading."
+                      : "Offline. Cached resources have not been verified."}
+                </p>
               </div>
-            </>
+              <InstallApp ready={ready} />
+              <Reminders />
+              <button className="primary" onClick={exportData}>
+                Export health report
+              </button>
+              <DataTransfer onImported={reloadRecords} />
+              <p className="fine-print">
+                Records stay in this browser on this device. Export a backup
+                before changing devices or clearing browser storage.
+              </p>
+            </section>
           )}
           {view === "Measurements" && (
             <section className="panel form-panel">
@@ -670,9 +460,7 @@ export default function Home() {
                 {entrySource.toUpperCase()} ·{" "}
                 {review ? "02 / REVIEW" : "01 / MEASURE"}
               </div>
-              <h2>
-                {review ? "Review your reading" : "Make a moment for yourself."}
-              </h2>
+              <h2>{review ? "Review your reading" : "Record a measurement"}</h2>
               {!review ? (
                 <form
                   onSubmit={(e) => {
@@ -832,7 +620,7 @@ export default function Home() {
               <Trends records={[...samples, ...records]} />
               <section className="panel">
                 <div className="section-heading">
-                  <h2>Your health log</h2>
+                  <h2>Saved health readings</h2>
                   <button onClick={exportData}>Export JSON ↗</button>
                 </div>
                 <p>
@@ -933,7 +721,7 @@ export default function Home() {
           {view === "Offline guides" && (
             <section className="panel">
               <div className="section-heading">
-                <h2>Your onboard library</h2>
+                <h2>Measurement guides</h2>
                 <span className="tag">BUNDLED IN APP SHELL</span>
               </div>
               <p>
@@ -1085,13 +873,6 @@ export default function Home() {
           )}
           {view === "Wellbeing" && <Wellbeing onDirty={setExtraDirty} />}
           {view === "Move the Moon" && <MoveTheMoon />}
-          <Reminders />
-          <button
-            className="global-emergency"
-            onClick={() => navigate("Emergency assist")}
-          >
-            <Icon name="Emergency assist" size={17} /> Emergency assist
-          </button>
           <footer>
             <span>
               <Icon name="shield" size={14} />{" "}
