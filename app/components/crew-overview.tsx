@@ -3,6 +3,7 @@
 import type {
   Astronaut,
   Reading,
+  Wellness,
 } from "../../lib/storage";
 
 function latestReading(
@@ -26,6 +27,7 @@ export default function CrewOverview({
   astronauts,
   activeAstronautId,
   records,
+  wellness,
   onSelect,
   onHistory,
   onMeasure,
@@ -33,6 +35,7 @@ export default function CrewOverview({
   astronauts: Astronaut[];
   activeAstronautId: string | null;
   records: Reading[];
+  wellness: Wellness[];
   onSelect: (id: string | null) => void;
   onHistory: () => void;
   onMeasure: () => void;
@@ -45,6 +48,16 @@ export default function CrewOverview({
     (r) =>
       (r.astronautId ?? null) === activeAstronautId,
   );
+
+  const latestWellness = wellness
+  .filter(
+    (r) =>
+      (r.astronautId ?? null) === activeAstronautId,
+  )
+  .sort(
+    (a, b) =>
+      Date.parse(b.timestamp) - Date.parse(a.timestamp),
+  )[0];
 
   const metrics: Reading["kind"][] = [
     "Heart rate",
@@ -163,6 +176,23 @@ export default function CrewOverview({
               </div>
             );
           })}
+          <div>
+  <dt>Sleep</dt>
+  <dd>
+    {latestWellness
+      ? `${latestWellness.sleep} hours`
+      : "Not recorded"}
+  </dd>
+</div>
+
+<div>
+  <dt>Mood</dt>
+  <dd>
+    {latestWellness
+      ? latestWellness.mood
+      : "Not recorded"}
+  </dd>
+</div>
         </dl>
 
         <div className="actions">

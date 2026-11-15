@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  readRecords,
   saveRecord,
   validateRoutine,
   type Reading,
@@ -44,16 +43,24 @@ const areas = [
 ];
 export default function Wellbeing({
   onDirty,
+  astronautId,
+  astronautName,
+  records,
+  vitals,
+  onSaved,
 }: {
   onDirty: (dirty: boolean) => void;
+  astronautId: string | null;
+  astronautName: string;
+  records: Wellness[];
+  vitals: Reading[];
+  onSaved: (record: Wellness) => void;
 }) {
   const [sleep, setSleep] = useState("");
   const [mood, setMood] = useState("");
   const [area, setArea] = useState("No area");
   const [note, setNote] = useState("");
   const [routine, setRoutine] = useState(blankRoutine);
-  const [records, setRecords] = useState<Wellness[]>([]);
-  const [vitals, setVitals] = useState<Reading[]>([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -73,14 +80,8 @@ export default function Wellbeing({
     return () => onDirty(false);
   }, [dirty, onDirty]);
   useEffect(() => {
-    queueMicrotask(() => setNow(Date.now()));
-    readRecords<Reading>("readings")
-      .then(setVitals)
-      .catch((e) => setError(e.message));
-    readRecords<Wellness>("wellness")
-      .then(setRecords)
-      .catch((e) => setError(e.message));
-  }, []);
+  queueMicrotask(() => setNow(Date.now()));
+}, []);
   async function save() {
     setError("");
     if (sleep === "" || !mood) {
@@ -94,8 +95,9 @@ export default function Wellbeing({
     }
     setBusy(true);
     try {
-      const record = {
+      const record: Wellness = {
         id: crypto.randomUUID(),
+        astronautId: astronautId ?? undefined,
         timestamp: new Date().toISOString(),
         sleep,
         mood,
@@ -104,13 +106,15 @@ export default function Wellbeing({
         routine,
       };
       await saveRecord("wellness", record);
-      setRecords((v) => [record, ...v]);
+      onSaved(record);
       setSleep("");
       setMood("");
       setArea("No area");
       setNote("");
       setRoutine(blankRoutine);
-      setMessage("Wellbeing check-in saved on this device.");
+      setMessage(
+  `Wellbeing check-in saved for ${astronautName} on this device.`,
+);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -119,7 +123,9 @@ export default function Wellbeing({
   }
   return (
     <section className="panel wellbeing">
-      <div className="eyebrow">PERSONAL LOG · FICTIONAL CHECK-IN</div>
+      <div className="eyebrow">
+        PERSONAL LOG · {astronautName}
+      </div>
       <h2>Sleep, mood and observations</h2>
       <p>
         Record sleep, mood and body-area observations. Review persistent changes

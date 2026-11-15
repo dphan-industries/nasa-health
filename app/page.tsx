@@ -5,6 +5,7 @@ import {
   Reading,
   Incident,
   type Astronaut,
+  type Wellness,
   readRecords,
   saveRecord,
   validateReading,
@@ -44,32 +45,42 @@ export default function Home() {
   const [historyPage, setHistoryPage] = useState(0);
   const [viewHistory, setViewHistory] = useState<View[]>([]);
   const [allRecords, setRecords] = useState<Reading[]>([]);
-const [allIncidents, setIncidents] = useState<Incident[]>([]);
+  const [allIncidents, setIncidents] = useState<Incident[]>([]);
+  const [allWellness, setAllWellness] = useState<Wellness[]>([]);
 
-const [astronauts, setAstronauts] = useState<Astronaut[]>([]);
+  const [astronauts, setAstronauts] = useState<Astronaut[]>([]);
 
-const [activeAstronautId, setActiveAstronautId] =
-  useState<string | null>(null);
+  const [activeAstronautId, setActiveAstronautId] =
+    useState<string | null>(null);
 
-const activeAstronaut = astronauts.find(
-  (p) => p.id === activeAstronautId,
-);
+  const activeAstronaut = astronauts.find(
+    (p) => p.id === activeAstronautId,
+  );
 
-const records = useMemo(
-  () =>
-    allRecords.filter(
-      (r) => (r.astronautId ?? null) === activeAstronautId,
-    ),
-  [allRecords, activeAstronautId],
-);
+  const records = useMemo(
+    () =>
+      allRecords.filter(
+        (r) => (r.astronautId ?? null) === activeAstronautId,
+      ),
+    [allRecords, activeAstronautId],
+  );
 
-const incidents = useMemo(
-  () =>
-    allIncidents.filter(
-      (i) => (i.astronautId ?? null) === activeAstronautId,
-    ),
-  [allIncidents, activeAstronautId],
-);
+  const incidents = useMemo(
+    () =>
+      allIncidents.filter(
+        (i) => (i.astronautId ?? null) === activeAstronautId,
+      ),
+    [allIncidents, activeAstronautId],
+  );
+
+  const wellness = useMemo(
+    () =>
+      allWellness.filter(
+        (r) => (r.astronautId ?? null) === activeAstronautId,
+      ),
+    [allWellness, activeAstronautId],
+  );
+
   const [cacheReady, setReady] = useState(false);
   const [storageReady, setStorageReady] = useState(false);
   const [storageError, setStorageError] = useState("");
@@ -105,11 +116,13 @@ const incidents = useMemo(
   readRecords<Reading>("readings"),
   readRecords<Incident>("incidents"),
   loadAstronauts(),
+  readRecords<Wellness>("wellness"),
 ])
-  .then(([readings, savedIncidents, profiles]) => {
+  .then(([readings, savedIncidents, profiles, savedWellness]) => {
     setRecords(readings);
     setIncidents(savedIncidents);
     setAstronauts(profiles);
+    setAllWellness(savedWellness);
 
     let savedProfile: string | null = null;
 
@@ -303,14 +316,17 @@ const incidents = useMemo(
     }
   }
   async function reloadRecords() {
-    const [r, i] = await Promise.all([
-      readRecords<Reading>("readings"),
-      readRecords<Incident>("incidents"),
-    ]);
-    setRecords(r);
-    setHistoryPage(0);
-    setIncidents(i);
-  }
+  const [r, i, w] = await Promise.all([
+    readRecords<Reading>("readings"),
+    readRecords<Incident>("incidents"),
+    readRecords<Wellness>("wellness"),
+  ]);
+
+  setRecords(r);
+  setIncidents(i);
+  setAllWellness(w);
+  setHistoryPage(0);
+}
   function reviewSensor(r: SensorReading) {
     if (!navigate("Measurements")) return;
     setKind(r.kind);
@@ -541,6 +557,7 @@ const incidents = useMemo(
               astronauts={astronauts}
               activeAstronautId={activeAstronautId}
               records={allRecords}
+               wellness={allWellness}
               onSelect={selectAstronaut}
               onHistory={() => navigate("Health history")}
               onMeasure={() => navigate("Measurements")}
@@ -995,7 +1012,23 @@ const incidents = useMemo(
               onDirty={setExtraDirty}
             />
           )}
-          {view === "Wellbeing" && <Wellbeing onDirty={setExtraDirty} />}
+          {view === "Wellbeing" && (
+              storageReady ? (
+                <Wellbeing
+                  key={activeAstronautId ?? "unassigned"}
+                  astronautId={activeAstronautId}
+                  astronautName={activeAstronaut?.name ?? "Unassigned"}
+                  records={wellness}
+                  vitals={records}
+                  onDirty={setExtraDirty}
+                  onSaved={(record) =>
+                    setAllWellness((previous) => [record, ...previous])
+                  }
+                />
+              ) : (
+                <p>Local health records are not available yet.</p>
+              )
+            )}
           {view === "Move the Moon" && <MoveTheMoon />}
           <footer>
             <span>

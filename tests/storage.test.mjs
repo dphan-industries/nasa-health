@@ -146,3 +146,62 @@ test("astronaut readings remain isolated", async () => {
   assert.equal(legacy.length, 1);
   assert.equal(legacy[0].value, "68");
 });
+
+test("astronaut wellbeing records remain isolated", async () => {
+  globalThis.indexedDB = new IDBFactory();
+
+  const base = {
+    timestamp: "2026-11-15T10:00:00Z",
+    bodyArea: "No area",
+    note: "",
+  };
+
+  await saveRecord("wellness", {
+    ...base,
+    id: "wellness-edsel",
+    astronautId: "edsel-ong",
+    sleep: "7.5",
+    mood: "Good",
+  });
+
+  await saveRecord("wellness", {
+    ...base,
+    id: "wellness-viet",
+    astronautId: "viet-phan",
+    sleep: "5",
+    mood: "Low",
+  });
+
+  await saveRecord("wellness", {
+    ...base,
+    id: "wellness-legacy",
+    sleep: "8",
+    mood: "Neutral",
+  });
+
+  const edsel = await readRecordsForAstronaut(
+    "wellness",
+    "edsel-ong",
+  );
+
+  const viet = await readRecordsForAstronaut(
+    "wellness",
+    "viet-phan",
+  );
+
+  const legacy = await readRecordsForAstronaut(
+    "wellness",
+    null,
+  );
+
+  assert.equal(edsel.length, 1);
+  assert.equal(edsel[0].sleep, "7.5");
+  assert.equal(edsel[0].mood, "Good");
+
+  assert.equal(viet.length, 1);
+  assert.equal(viet[0].sleep, "5");
+  assert.equal(viet[0].mood, "Low");
+
+  assert.equal(legacy.length, 1);
+  assert.equal(legacy[0].sleep, "8");
+});
