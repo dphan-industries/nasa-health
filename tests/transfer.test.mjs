@@ -86,3 +86,100 @@ test("version 1 database migrates without losing saved readings", async () => {
   db.close();
   assert.equal((await readRecords("readings"))[0].id, "r1");
 });
+const profile = {
+  id: "test-astronaut",
+  name: "Test Astronaut",
+  role: "Flight Engineer",
+  initials: "TA",
+  bio: "Fictional test profile",
+  createdAt: "2026-11-16T01:00:00Z",
+};
+
+const profileReport = {
+  schema: 2,
+  astronauts: [profile],
+  readings: [
+    {
+      ...report.readings[0],
+      id: "profile-reading",
+      astronautId: profile.id,
+    },
+  ],
+  incidents: [],
+  wellness: [],
+};
+
+test("schema 2 imports astronaut profiles and owned readings", async () => {
+  globalThis.indexedDB = new IDBFactory();
+
+  const validated = parseTransfer(
+    JSON.stringify(profileReport),
+  );
+
+  await importTransfer(validated);
+
+  const profiles = await readRecords("astronauts");
+  const readings = await readRecords("readings");
+
+  assert.equal(profiles.length, 1);
+  assert.equal(profiles[0].id, profile.id);
+  assert.equal(profiles[0].name, profile.name);
+
+  assert.equal(readings.length, 1);
+  assert.equal(readings[0].astronautId, profile.id);
+});
+
+test("schema 2 rejects records with missing astronaut profiles", () => {
+  assert.throws(
+    () =>
+      parseTransfer(
+        JSON.stringify({
+          ...profileReport,
+          astronauts: [],
+        }),
+      ),
+    /Invalid reading/,
+  );
+});
+
+test("backup import preserves existing astronaut profiles", async () => {
+  globalThis.indexedDB = new IDBFactory();
+
+  await saveRecord("astronauts", {
+    ...profile,
+    name: "Existing Astronaut",
+  });
+
+  await importTransfer(profileReport);
+
+  const profiles = await readRecords("astronauts");
+
+  assert.equal(profiles.length, 1);
+  assert.equal(profiles[0].name, "Existing Astronaut");
+});
+
+test("legacy imports reject unknown astronaut ownership without partial writes", async () => {
+  globalThis.indexedDB = new IDBFactory();
+
+  const legacyReport = {
+    ...report,
+    readings: [
+      report.readings[0],
+      {
+        ...report.readings[0],
+        id: "unknown-owner-reading",
+        astronautId: "unknown-astronaut",
+      },
+    ],
+  };
+
+  await assert.rejects(
+    importTransfer(legacyReport),
+    /Unknown astronaut profile/,
+  );
+
+  assert.equal(
+    (await readRecords("readings")).length,
+    0,
+  );
+});

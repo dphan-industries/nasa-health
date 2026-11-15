@@ -287,44 +287,58 @@ export default function Home() {
     }
   }
   async function exportData() {
-    try {
-      const wellness = await readRecords("wellness");
-      const blob = new Blob(
-        [
-          JSON.stringify(
-            {
-              schema: 1,
-              exportedAt: new Date().toISOString(),
-              readings: allRecords,
-              incidents: allIncidents,
-              wellness,
-            },
-            null,
-            2,
-          ),
-        ],
-        { type: "application/json" },
-      );
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "crew-health-report.json";
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (e) {
-      setError((e as Error).message);
-    }
+  try {
+    const [
+      savedAstronauts,
+      savedReadings,
+      savedIncidents,
+      savedWellness,
+    ] = await Promise.all([
+      readRecords<Astronaut>("astronauts"),
+      readRecords<Reading>("readings"),
+      readRecords<Incident>("incidents"),
+      readRecords<Wellness>("wellness"),
+    ]);
+
+    const report = {
+      schema: 2,
+      exportedAt: new Date().toISOString(),
+      astronauts: savedAstronauts,
+      readings: savedReadings,
+      incidents: savedIncidents,
+      wellness: savedWellness,
+    };
+
+    const blob = new Blob(
+      [JSON.stringify(report, null, 2)],
+      { type: "application/json" },
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = "crew-health-backup.json";
+    a.click();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (e) {
+    setError((e as Error).message);
   }
+}
+     
   async function reloadRecords() {
-  const [r, i, w] = await Promise.all([
+  const [r, i, w, profiles] = await Promise.all([
     readRecords<Reading>("readings"),
     readRecords<Incident>("incidents"),
     readRecords<Wellness>("wellness"),
+    readRecords<Astronaut>("astronauts"),
   ]);
 
   setRecords(r);
   setIncidents(i);
   setAllWellness(w);
+  setAstronauts(profiles);
   setHistoryPage(0);
 }
   function reviewSensor(r: SensorReading) {
@@ -581,7 +595,7 @@ export default function Home() {
               <InstallApp ready={ready} />
               <Reminders />
               <button className="primary" onClick={exportData}>
-                Export health report
+                Export all crew data
               </button>
               <DataTransfer onImported={reloadRecords} />
               <p className="fine-print">
@@ -762,7 +776,7 @@ export default function Home() {
               <section className="panel">
                 <div className="section-heading">
                   <h2>Saved health readings</h2>
-                  <button onClick={exportData}>Export JSON ↗</button>
+                  <button onClick={exportData}>Export crew backup ↗</button>
                 </div>
                 <p>
                   Entries and source labels on this device. Exported files may
