@@ -183,3 +183,30 @@ test("legacy imports reject unknown astronaut ownership without partial writes",
     0,
   );
 });
+test("historical inconsistent BP readings remain importable", async () => {
+  globalThis.indexedDB = new IDBFactory();
+
+  const legacyReport = {
+    ...report,
+    readings: [
+      {
+        ...report.readings[0],
+        id: "legacy-bp",
+        kind: "Blood pressure",
+        value: "60 / 70",
+        unit: "mmHg",
+      },
+    ],
+  };
+
+  const validated = parseTransfer(
+    JSON.stringify(legacyReport),
+  );
+
+  await importTransfer(validated);
+
+  const readings = await readRecords("readings");
+
+  assert.equal(readings.length, 1);
+  assert.equal(readings[0].value, "60 / 70");
+});

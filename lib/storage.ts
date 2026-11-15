@@ -49,6 +49,28 @@ export function validateReading(
     return "Use values from 1–999. This checks format only, not medical safety.";
   return "";
 }
+export function validateNewReading(
+  kind: string,
+  first: string,
+  second: string,
+): string {
+  const formatError = validateReading(
+    kind,
+    first,
+    second,
+  );
+
+  if (formatError) return formatError;
+
+  if (
+    kind === "Blood pressure" &&
+    Number(first) <= Number(second)
+  ) {
+    return "Systolic pressure must be greater than diastolic pressure. Check the measurement and try again.";
+  }
+
+  return "";
+}
 export function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open("crew-health", 3);

@@ -8,7 +8,7 @@ import {
   type Wellness,
   readRecords,
   saveRecord,
-  validateReading,
+  validateNewReading,
 } from "../lib/storage";
 import { loadAstronauts } from "../lib/astronauts";
 import { monitorOffline } from "../lib/offline";
@@ -212,11 +212,23 @@ export default function Home() {
       setViewHistory((history) => history.slice(0, -1));
   }
   async function save() {
-    if (!astronauts.length) {
-  setError("Crew profiles are not available yet.");
-  return;
-}
-    setBusy(true);
+  if (!astronauts.length) {
+    setError("Crew profiles are not available yet.");
+    return;
+  }
+
+  const validationError = validateNewReading(
+    kind,
+    first,
+    second,
+  );
+
+  if (validationError) {
+    setError(validationError);
+    return;
+  }
+
+  setBusy(true);
     setError("");
     try {
       const record: Reading = {
@@ -342,7 +354,18 @@ export default function Home() {
   setHistoryPage(0);
 }
   function reviewSensor(r: SensorReading) {
-    if (!navigate("Measurements")) return;
+  const validationError = validateNewReading(
+    r.kind,
+    r.first,
+    r.second,
+  );
+
+  if (validationError) {
+    setError(validationError);
+    return;
+  }
+
+  if (!navigate("Measurements")) return;
     setKind(r.kind);
     setFirst(r.first);
     setSecond(r.second);
@@ -615,7 +638,7 @@ export default function Home() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    const message = validateReading(kind, first, second);
+                    const message = validateNewReading(kind, first, second);
                     setError(message);
                     if (!message) setReview(true);
                   }}

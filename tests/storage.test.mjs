@@ -2,12 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { IDBFactory } from "fake-indexeddb";
 import {
-  validateReading,
   openDatabase,
-  saveRecord,
+  validateReading,
+  validateNewReading,
   readRecords,
+  saveRecord,
   readRecordsForAstronaut,
-  
 } from "../lib/storage.ts";
 test("validation accepts formats without clinical interpretation", () => {
   assert.equal(validateReading("Heart rate", "68", ""), "");
@@ -253,4 +253,31 @@ test("astronaut medical follow-ups remain isolated", async () => {
 
   assert.equal(legacy.length, 1);
   assert.equal(legacy[0].notes, "Unassigned legacy incident");
+});
+test("new blood pressure readings require systolic above diastolic", () => {
+  assert.equal(
+    validateNewReading("Blood pressure", "120", "80"),
+    "",
+  );
+
+  assert.equal(
+    validateNewReading("Blood pressure", "181", "121"),
+    "",
+  );
+
+  for (const [first, second] of [
+    ["60", "70"],
+    ["50", "56"],
+    ["80", "80"],
+    ["120", ""],
+  ]) {
+    assert.ok(
+      validateNewReading("Blood pressure", first, second),
+    );
+  }
+
+  assert.equal(
+    validateNewReading("Heart rate", "91", ""),
+    "",
+  );
 });

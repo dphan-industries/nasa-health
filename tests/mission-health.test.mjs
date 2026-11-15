@@ -19,7 +19,7 @@ test('BP categories apply the higher component and distinguish severe boundaries
  assert.match(bp('118 / 80').title,/Stage 1/);
  assert.match(bp('140 / 76').title,/Stage 2/);
  assert.notEqual(bp('180 / 120').level,'urgent');
- assert.equal(bp('181 / 70').level,'urgent');assert.equal(bp('118 / 121').level,'urgent');
+ assert.equal(bp('181 / 70').level,'urgent');assert.equal(bp('130 / 121').level,'urgent');
  assert.match(bp('181 / 121').actions.join(' '),/emergency response/);
 });
 test('glucose low and severe ranges and context-sensitive pulse do not declare safety',()=>{
@@ -51,4 +51,19 @@ test('routine import rejects impossible duration totals and preserves unknown va
  assert.equal(parseTransfer(JSON.stringify(base)).wellness[0].routine.waterMl,'');
  const bad=structuredClone(base);bad.wellness[0].routine.aerobicMinutes='1000';bad.wellness[0].routine.resistanceMinutes='1000';assert.throws(()=>parseTransfer(JSON.stringify(bad)),/Invalid routine/);
  const meals=structuredClone(base);meals.wellness[0].routine.meals='25';assert.throws(()=>parseTransfer(JSON.stringify(meals)),/Invalid routine/);
+});
+test("historical invalid blood pressure readings are flagged", () => {
+  for (const value of ["60 / 70", "50 / 56", "80 / 80"]) {
+    const result = assessReading({
+      kind: "Blood pressure",
+      value,
+    });
+
+    assert.equal(result.level, "review");
+
+    assert.match(
+      result.title,
+      /Invalid blood pressure measurement/,
+    );
+  }
 });
