@@ -1,6 +1,5 @@
 "use client";
 import Image from "next/image";
-import { flushSync } from "react-dom";
 import { useEffect, useState, useRef, useMemo } from "react";
 import {
   Reading,
@@ -106,14 +105,7 @@ export default function Home() {
     window.scrollTo(0, 0);
   }, [view]);
   function showView(next: View) {
-    if (
-      document.startViewTransition &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      document.startViewTransition(() => {
-        flushSync(() => setView(next));
-      });
-    } else setView(next);
+    setView(next);
   }
   function navigate(next: View, track = true) {
     if (dirty && !window.confirm("Discard unsaved entries and notes?"))
@@ -299,14 +291,28 @@ export default function Home() {
             </div>
           </div>
         </header>
-        <main id="main" key={view}>
+        <main id="main" className={view === "Dashboard" ? "main-home" : "feature-page"}>
           <div className="page-heading">
             <div>
               <div className="eyebrow">
                 DEEP SPACE <span> / </span> HEALTH SYSTEMS
               </div>
               <h1 ref={heading} tabIndex={-1}>
-                {view === "Dashboard" ? "Mission home" : view}
+                {
+                  {
+                    Dashboard: "Mission home",
+                    Measurements: "Record vitals",
+                    "Mission health": "Health check",
+                    Wearables: "Connect a device",
+                    "Offline guides": "Field guide",
+                    "Emergency assist": "Emergency training",
+                    "Health history": "Saved history",
+                    Wellbeing: "Wellbeing",
+                    "Move the Moon": "Move the Moon",
+                    "Device & data": "Device & data",
+                    "Crew overview": "Crew overview",
+                  }[view]
+                }
               </h1>
               <p>{view === "Dashboard" ? "Choose what you need." : ""}</p>
             </div>
@@ -342,84 +348,99 @@ export default function Home() {
             </div>
           )}
           {view === "Dashboard" && (
-            <nav className="console-grid" aria-label="All features">
+            <div className="home-workflows">
+              <section aria-labelledby="daily-title" className="daily-workflow">
+                <h2 id="daily-title">Daily check-in</h2>
+                <button
+                  className="primary-checkin"
+                  onClick={() => navigate("Measurements")}
+                >
+                  <Icon name="Measurements" size={32} />
+                  <span>
+                    <strong>Record vitals</strong>
+                    <small>
+                      Heart rate, blood pressure, glucose or temperature
+                    </small>
+                  </span>
+                  <span className="checkin-action">
+                    Start check-in <Icon name="arrow" size={20} />
+                  </span>
+                </button>
+              </section>
               {(
                 [
                   {
-                    view: "Measurements",
-                    label: "Record vitals",
-                    hint: "Pulse · pressure · more",
-                    tone: "cyan",
+                    title: "Review & follow up",
+                    items: [
+                      {
+                        view: "Mission health",
+                        label: "Health check",
+                        hint: "Review readings and next steps",
+                      },
+                      {
+                        view: "Crew overview",
+                        label: "Crew overview",
+                        hint: "Team profiles and saved history",
+                      },
+                      {
+                        view: "Wellbeing",
+                        label: "Wellbeing",
+                        hint: "Sleep, mood and observations",
+                      },
+                    ],
                   },
                   {
-                    view: "Mission health",
-                    label: "Health check",
-                    hint: "Assess & take action",
-                    tone: "cyan",
-                  },
-                  {
-                    view: "Crew overview",
-                    label: "Crew overview",
-                    hint: "Crew data & my history",
-                    tone: "cyan",
-                  },
-                  {
-                    view: "Wellbeing",
-                    label: "Wellbeing",
-                    hint: "Sleep · mood · body",
-                    tone: "green",
-                  },
-                  {
-                    view: "Wearables",
-                    label: "Connect a device",
-                    hint: "Sensors & wearables",
-                    tone: "green",
-                  },
-                  {
-                    view: "Offline guides",
-                    label: "Field guide",
-                    hint: "How to measure & respond",
-                    tone: "green",
-                  },
-                  {
-                    view: "Move the Moon",
-                    label: "Move the Moon",
-                    hint: "Offline game",
-                    tone: "violet",
-                  },
-                  {
-                    view: "Device & data",
-                    label: "Device & data",
-                    hint: "Install · reminders · backup",
-                    tone: "violet",
-                  },
-                  {
-                    view: "Emergency assist",
-                    label: "Emergency assist",
-                    hint: "Response rehearsal",
-                    tone: "orange",
+                    title: "Tools & training",
+                    items: [
+                      {
+                        view: "Wearables",
+                        label: "Connect a device",
+                        hint: "Bluetooth sensors",
+                      },
+                      {
+                        view: "Offline guides",
+                        label: "Field guide",
+                        hint: "Measurement instructions",
+                      },
+                      {
+                        view: "Device & data",
+                        label: "Device & data",
+                        hint: "Install, reminders and backups",
+                      },
+                      {
+                        view: "Move the Moon",
+                        label: "Move the Moon",
+                        hint: "Recreation · offline game",
+                      },
+                      {
+                        view: "Emergency assist",
+                        label: "Emergency training",
+                        hint: "Practice only · no help is dispatched",
+                      },
+                    ],
                   },
                 ] as const
-              ).map((item, index) => (
-                <button
-                  key={item.view}
-                  className={"console-tile tone-" + item.tone}
-                  onClick={() => navigate(item.view)}
-                >
-                  <span className="console-tile-code" aria-hidden="true">
-                    {String(index + 1).padStart(2, "0")} /
-                  </span>
-                  <span className="console-tile-icon">
-                    <Icon name={item.view} size={36} />
-                  </span>
-                  <span className="console-tile-label">{item.label}</span>
-                  <span className="console-tile-hint">{item.hint}</span>
-                  <span className="console-tile-corner" aria-hidden="true">
-                    ↗
-                  </span>
-                </button>
+              ).map((group) => (
+                <section className="home-tool-section" key={group.title}>
+                  <h2>{group.title}</h2>
+                  <nav className="workflow-grid" aria-label={group.title}>
+                    {group.items.map((item) => (
+                      <button
+                        className="workflow-link"
+                        key={item.view}
+                        onClick={() => navigate(item.view)}
+                      >
+                        <Icon name={item.view} size={24} />
+                        <span>
+                          <strong>{item.label}</strong>
+                          <small>{item.hint}</small>
+                        </span>
+                      </button>
+                    ))}
+                  </nav>
+                </section>
               ))}
-            </nav>
+            </div>
           )}
           {view === "Crew overview" && (
             <CrewOverview
@@ -460,7 +481,7 @@ export default function Home() {
                 {entrySource.toUpperCase()} ·{" "}
                 {review ? "02 / REVIEW" : "01 / MEASURE"}
               </div>
-              <h2>{review ? "Review your reading" : "Record a measurement"}</h2>
+              {review && <h2>Review reading</h2>}
               {!review ? (
                 <form
                   onSubmit={(e) => {
@@ -495,7 +516,38 @@ export default function Home() {
                       <option>Body temperature</option>
                     </select>
                   </label>
-                  <MeasurementInstructions kind={kind} />
+                  <p className="measurement-safety">
+                    Use the approved measurement device and mission procedure.
+                    Urgent symptoms take priority; do not delay the approved
+                    emergency response to enter a reading.
+                  </p>
+                  <div className="input-row">
+                    <NumberControl
+                      label={kind === "Blood pressure" ? "Systolic" : kind}
+                      decimal={kind === "Body temperature"}
+                      unit={UNITS[kind]}
+                      value={first}
+                      onChange={(v) => {
+                        setFirst(v);
+                        setEntrySource("Manual entry");
+                        setEntryTimestamp("");
+                        setEntryDevice("");
+                      }}
+                    />
+                    {kind === "Blood pressure" && (
+                      <NumberControl
+                        label="Diastolic"
+                        unit="mmHg"
+                        value={second}
+                        onChange={(v) => {
+                          setSecond(v);
+                          setEntrySource("Manual entry");
+                          setEntryTimestamp("");
+                          setEntryDevice("");
+                        }}
+                      />
+                    )}
+                  </div>
                   <label>
                     Measurement context
                     <select
@@ -525,33 +577,7 @@ export default function Home() {
                       ))}
                     </select>
                   </label>
-                  <div className="input-row">
-                    <NumberControl
-                      label={kind === "Blood pressure" ? "Systolic" : kind}
-                      decimal={kind === "Body temperature"}
-                      unit={UNITS[kind]}
-                      value={first}
-                      onChange={(v) => {
-                        setFirst(v);
-                        setEntrySource("Manual entry");
-                        setEntryTimestamp("");
-                        setEntryDevice("");
-                      }}
-                    />
-                    {kind === "Blood pressure" && (
-                      <NumberControl
-                        label="Diastolic"
-                        unit="mmHg"
-                        value={second}
-                        onChange={(v) => {
-                          setSecond(v);
-                          setEntrySource("Manual entry");
-                          setEntryTimestamp("");
-                          setEntryDevice("");
-                        }}
-                      />
-                    )}
-                  </div>
+                  <MeasurementInstructions kind={kind} />
                   <label>
                     Observation <span>(optional · fictional data only)</span>
                     <textarea
@@ -785,7 +811,7 @@ export default function Home() {
               <h2>
                 {
                   [
-                    "Emergency assist simulation",
+                    "Emergency training",
                     "Guided emergency rehearsal",
                     "Record your observations",
                     "Incident summary",

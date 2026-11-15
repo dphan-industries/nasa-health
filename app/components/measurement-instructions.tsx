@@ -8,7 +8,8 @@ export default function MeasurementInstructions({
 }) {
   const h = MEASUREMENT_HELP[kind];
   return (
-    <div className="instruction">
+    <details className="instruction measurement-help" key={kind}>
+      <summary>How to measure {kind.toLowerCase()} and why it matters</summary>
       <strong>Before you begin · {h.what}</strong>
       <p>
         <strong>Why it matters:</strong> {h.why}
@@ -30,6 +31,6 @@ export default function MeasurementInstructions({
         For adult educational use. Follow the approved device and mission
         procedure; reference guidance is not flight validation.
       </p>
-    </div>
+    </details>
   );
 }

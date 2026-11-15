@@ -1,4 +1,4 @@
-const CACHE = "crew-health-v28";
+const CACHE = "crew-health-v29";
 const BASE = [
   "/brand/deep-space-background.svg",
   "/brand/space-apps-color-white.svg",

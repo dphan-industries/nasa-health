@@ -137,7 +137,7 @@ export default function MissionHealth({
     <div className="mission-health">
       <section className="panel">
         <div className="eyebrow">ASSESS · UNDERSTAND · ACT · FOLLOW UP</div>
-        <h2>Health assessment</h2>
+        <h2>Mission context</h2>
         <p>
           Adult Earth reference guidance, adapted with mission-context cautions.
           This is an educational prototype, not a diagnosis or an approved

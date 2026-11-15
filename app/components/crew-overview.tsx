@@ -58,7 +58,7 @@ export default function CrewOverview({
           <p>Team roster · sample health values for demonstration only.</p>
         </div>
         <button className="secondary" onClick={onHistory}>
-          My saved history · {recordCount} readings
+          Saved history · {recordCount} readings
         </button>
       </div>
       <div className="crew-roster" aria-label="Team members">
@@ -106,7 +106,7 @@ export default function CrewOverview({
         <p>{person.note}</p>
         <small>
           These values do not establish fitness or safety. Your saved readings
-          stay separate in My saved history. This prototype does not connect or
+          stay separate in Saved history. This prototype does not connect or
           synchronize multiple crew devices.
         </small>
       </div>

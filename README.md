@@ -1,6 +1,6 @@
 # Deep Space Health Systems
 
-An offline-first crew health prototype for NASA Space Apps. The tablet interface uses a dim starfield, transparent header, straight-edged cards, and nine large navigation controls. A left-side arrow returns to the previous screen; page titles sit on the right. Subtle screen transitions respect reduced-motion preferences.
+An offline-first crew health prototype for NASA Space Apps. The tablet interface uses a dim starfield, transparent header, and straight-edged cards. Record vitals is the primary daily action, followed by grouped review tools and less frequent tools/training. Page titles and content align to the left. Navigation is immediate, with restrained color feedback instead of animated lift or crossfades.
 
 ![Current Mission home screen](docs/screenshots/current/home.png)
 
@@ -49,13 +49,13 @@ The screenshots below show the current design in a separate local preview. They 
 
 ### Mission home
 
-The nine tiles open Record vitals, Health check, Crew overview, Wellbeing, Connect a device, Field guide, Move the Moon, Device & data, and Emergency assist. There is no sidebar or repeated Home/emergency button in the header. The header blends into the starfield and displays the supplied Space Apps logo without a white panel.
+**Daily check-in** presents one prominent Record vitals action. **Review & follow up** groups Health check, Crew overview, and Wellbeing. **Tools & training** groups Connect a device, Field guide, Device & data, Move the Moon, and Emergency training. Recreation and training remain secondary to health recording. There is no sidebar or repeated Home/emergency button in the header. The header blends into the starfield and displays the supplied Space Apps logo without a white panel.
 
 ### Record vitals
 
 ![Centered measurement form](docs/screenshots/current/vitals.png)
 
-Choose **Heart rate**, **Blood pressure**, **Blood glucose**, or **Body temperature**. Instructions explain the measurement, units, and relevant context. The centered form supports number buttons, plus/minus controls, a touch keypad, optional sliders, and keyboard entry. Temperature supports decimals; blood pressure has separate systolic and diastolic values.
+Choose **Heart rate**, **Blood pressure**, **Blood glucose**, or **Body temperature**. The value input appears directly after the measurement selector and a brief safety note. Longer explanations and source-linked instructions are collapsed under How to measure. The left-aligned form supports number buttons, plus/minus controls, a touch keypad, optional sliders, and keyboard entry. Temperature supports decimals; blood pressure has separate systolic and diastolic values.
 
 Select **Review reading**, confirm the value and source, then **Save to this device**. A reviewed value is not saved until that final action. Unsaved entries prompt before navigation discards them.
 
@@ -77,13 +77,13 @@ The screen also explains the five spaceflight hazards and supports a downloadabl
 | Edsel Ong | Systems Engineer | Computer science student contributing to application development and engineering. |
 | Vicki Leow | Habitat Designer | Art diploma graduate from Singapore; artwork and visual design focused on a welcoming crew environment. |
 
-Select a member to view their profile and **demo** vital signs, sleep, mood, and observations. These titles describe the project crew. Sample health values are not personal medical records or live sensor data. **My saved history** opens this browser's saved readings separately; the app does not synchronize crew devices.
+Select a member to view their profile and **demo** vital signs, sleep, mood, and observations. These titles describe the project crew. Sample health values are not personal medical records or live sensor data. **Saved history** opens this browser's saved readings separately; the app does not synchronize crew devices.
 
 ### Saved history
 
 ![Health history and trends](docs/screenshots/current/history.png)
 
-Open **Crew overview → My saved history**. Review timestamps, units, sources, observations, and educational explanations. Charts support metric and time-range selection, and tables retain exact values. Fictional references are labeled. Report import/export transfers records manually between devices; it does not create an online account or automatic synchronization.
+Open **Crew overview → Saved history**. Review timestamps, units, sources, observations, and educational explanations. Charts support metric and time-range selection, and tables retain exact values. Fictional references are labeled. Report import/export transfers records manually between devices; it does not create an online account or automatic synchronization.
 
 ### Wellbeing
 
@@ -129,7 +129,7 @@ Install from a supported browser's menu or the displayed instructions. Phones ne
 
 Reminders work while the app is open; browser suspension can prevent delivery. Exported JSON contains local readings, wellbeing entries, and incident/action logs. Imports validate and merge by record ID. Reports are unencrypted and exclude game progress and reminders.
 
-### Emergency assist
+### Emergency training
 
 ![Emergency training workflow](docs/screenshots/current/emergency.png)
 
