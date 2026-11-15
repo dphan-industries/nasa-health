@@ -205,3 +205,52 @@ test("astronaut wellbeing records remain isolated", async () => {
   assert.equal(legacy.length, 1);
   assert.equal(legacy[0].sleep, "8");
 });
+test("astronaut medical follow-ups remain isolated", async () => {
+  globalThis.indexedDB = new IDBFactory();
+
+  const timestamp = "2026-11-16T01:00:00Z";
+
+  await saveRecord("incidents", {
+    id: "followup-edsel",
+    astronautId: "edsel-ong",
+    timestamp,
+    notes: "Edsel fictional follow-up",
+  });
+
+  await saveRecord("incidents", {
+    id: "followup-viet",
+    astronautId: "viet-phan",
+    timestamp,
+    notes: "Viet fictional follow-up",
+  });
+
+  await saveRecord("incidents", {
+    id: "followup-legacy",
+    timestamp,
+    notes: "Unassigned legacy incident",
+  });
+
+  const edsel = await readRecordsForAstronaut(
+    "incidents",
+    "edsel-ong",
+  );
+
+  const viet = await readRecordsForAstronaut(
+    "incidents",
+    "viet-phan",
+  );
+
+  const legacy = await readRecordsForAstronaut(
+    "incidents",
+    null,
+  );
+
+  assert.equal(edsel.length, 1);
+  assert.equal(edsel[0].notes, "Edsel fictional follow-up");
+
+  assert.equal(viet.length, 1);
+  assert.equal(viet[0].notes, "Viet fictional follow-up");
+
+  assert.equal(legacy.length, 1);
+  assert.equal(legacy[0].notes, "Unassigned legacy incident");
+});

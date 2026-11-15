@@ -1004,13 +1004,24 @@ export default function Home() {
             <Wearables onReview={reviewSensor} />
           </div>
           {view === "Mission health" && (
-            <MissionHealth
-              records={records}
-              onMeasure={() => navigate("Measurements")}
-              onEmergency={() => navigate("Emergency assist")}
-              onSaved={reloadRecords}
-              onDirty={setExtraDirty}
-            />
+            storageReady ? (
+              <MissionHealth
+                key={activeAstronautId ?? "unassigned"}
+                astronautId={activeAstronautId}
+                astronautName={activeAstronaut?.name ?? "Unassigned"}
+                records={records}
+                wellness={wellness}
+                incidents={incidents}
+                onMeasure={() => navigate("Measurements")}
+                onEmergency={() => navigate("Emergency assist")}
+                onSaved={(incident) =>
+                  setIncidents((previous) => [incident, ...previous])
+                }
+                onDirty={setExtraDirty}
+              />
+            ) : (
+              <p>Local health records are not available yet.</p>
+            )
           )}
           {view === "Wellbeing" && (
               storageReady ? (
