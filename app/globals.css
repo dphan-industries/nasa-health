@@ -3580,3 +3580,25 @@ body { background:#0b1424; }
 @media(max-width:420px) { .workflow-grid { grid-template-columns:1fr; }.workflow-link { min-height:72px; }.touch-console .page-heading h1 { font-size:25px; } }
 @media(min-width:700px) { .touch-console main.feature-page { padding-left:108px; }.touch-console .feature-page .page-heading .console-back { margin-left:-76px; } }
 @media(max-width:699px) { .touch-console .feature-page .page-heading { display:grid; grid-template-columns:1fr; gap:12px; }.touch-console .feature-page .page-heading > div { grid-row:2; }.touch-console .feature-page .page-heading .console-back { grid-row:1; margin:0; } }
+.active-profile-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  background: #14243a;
+  border: 1px solid #354654;
+  border-radius: 8px;
+  color: #c4d2e6;
+  font-size: 14px;
+}
+
+.active-profile-bar strong {
+  color: #f5f8ff;
+}
+
+.active-profile-bar button {
+  flex-shrink: 0;
+}

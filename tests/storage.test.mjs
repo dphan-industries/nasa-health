@@ -6,6 +6,8 @@ import {
   openDatabase,
   saveRecord,
   readRecords,
+  readRecordsForAstronaut,
+  
 } from "../lib/storage.ts";
 test("validation accepts formats without clinical interpretation", () => {
   assert.equal(validateReading("Heart rate", "68", ""), "");
@@ -18,11 +20,12 @@ test("validation accepts formats without clinical interpretation", () => {
 test("versioned database persists readings and incidents across connections", async () => {
   globalThis.indexedDB = new IDBFactory();
   const db = await openDatabase();
-  assert.equal(db.version, 2);
+  assert.equal(db.version, 3);
   assert.deepEqual(
-    [...db.objectStoreNames],
-    ["incidents", "preferences", "readings", "resources", "wellness"],
-  );
+  [...db.objectStoreNames],
+  ["astronauts", "incidents", "preferences",
+    "readings", "resources", "wellness"],
+);
   db.close();
   const reading = {
     id: "fictional",
@@ -86,4 +89,60 @@ test("aborted write transactions do not persist or report success", async () => 
     IDBDatabase.prototype.transaction = original;
   }
   assert.deepEqual(await readRecords("readings"), []);
+});
+
+test("astronaut readings remain isolated", async () => {
+  globalThis.indexedDB = new IDBFactory();
+
+  const base = {
+    kind: "Heart rate",
+    unit: "bpm",
+    timestamp: "2026-11-15T10:00:00Z",
+    note: "",
+    source: "Manual entry",
+  };
+
+  await saveRecord("readings", {
+    ...base,
+    id: "reading-1",
+    astronautId: "edsel-ong",
+    value: "85",
+  });
+
+  await saveRecord("readings", {
+    ...base,
+    id: "reading-2",
+    astronautId: "viet-phan",
+    value: "72",
+  });
+
+  await saveRecord("readings", {
+    ...base,
+    id: "legacy-reading",
+    value: "68",
+  });
+
+  const edsel = await readRecordsForAstronaut(
+    "readings",
+    "edsel-ong",
+  );
+
+  const viet = await readRecordsForAstronaut(
+    "readings",
+    "viet-phan",
+  );
+
+  const legacy = await readRecordsForAstronaut(
+    "readings",
+    null,
+  );
+
+  assert.equal(edsel.length, 1);
+  assert.equal(edsel[0].value, "85");
+
+  assert.equal(viet.length, 1);
+  assert.equal(viet[0].value, "72");
+
+  assert.equal(legacy.length, 1);
+  assert.equal(legacy[0].value, "68");
 });

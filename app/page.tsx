@@ -4,10 +4,12 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import {
   Reading,
   Incident,
+  type Astronaut,
   readRecords,
   saveRecord,
   validateReading,
 } from "../lib/storage";
+import { loadAstronauts } from "../lib/astronauts";
 import { monitorOffline } from "../lib/offline";
 import Icon from "./components/console-icon";
 import NumberControl from "./components/number-control";
@@ -24,7 +26,7 @@ import EmergencyGuide from "./components/emergency-guide";
 import MeasurementInstructions from "./components/measurement-instructions";
 import { METRICS, UNITS, assessReading } from "../lib/health";
 import { orderedReadings } from "../lib/insights";
-import { samples, guides } from "../lib/content";
+import { guides } from "../lib/content";
 type View =
   | "Dashboard"
   | "Measurements"
@@ -41,8 +43,33 @@ export default function Home() {
   const [view, setView] = useState<View>("Dashboard");
   const [historyPage, setHistoryPage] = useState(0);
   const [viewHistory, setViewHistory] = useState<View[]>([]);
-  const [records, setRecords] = useState<Reading[]>([]);
-  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [allRecords, setRecords] = useState<Reading[]>([]);
+const [allIncidents, setIncidents] = useState<Incident[]>([]);
+
+const [astronauts, setAstronauts] = useState<Astronaut[]>([]);
+
+const [activeAstronautId, setActiveAstronautId] =
+  useState<string | null>(null);
+
+const activeAstronaut = astronauts.find(
+  (p) => p.id === activeAstronautId,
+);
+
+const records = useMemo(
+  () =>
+    allRecords.filter(
+      (r) => (r.astronautId ?? null) === activeAstronautId,
+    ),
+  [allRecords, activeAstronautId],
+);
+
+const incidents = useMemo(
+  () =>
+    allIncidents.filter(
+      (i) => (i.astronautId ?? null) === activeAstronautId,
+    ),
+  [allIncidents, activeAstronautId],
+);
   const [cacheReady, setReady] = useState(false);
   const [storageReady, setStorageReady] = useState(false);
   const [storageError, setStorageError] = useState("");
@@ -75,15 +102,36 @@ export default function Home() {
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
     Promise.all([
-      readRecords<Reading>("readings"),
-      readRecords<Incident>("incidents"),
-    ])
-      .then(([readings, savedIncidents]) => {
-        setRecords(readings);
-        setIncidents(savedIncidents);
-        setStorageReady(true);
-      })
-      .catch((e) => setStorageError(e.message));
+  readRecords<Reading>("readings"),
+  readRecords<Incident>("incidents"),
+  loadAstronauts(),
+])
+  .then(([readings, savedIncidents, profiles]) => {
+    setRecords(readings);
+    setIncidents(savedIncidents);
+    setAstronauts(profiles);
+
+    let savedProfile: string | null = null;
+
+    try {
+      savedProfile = localStorage.getItem(
+        "active-astronaut",
+      );
+    } catch {
+      // Profile selection will use the default.
+    }
+
+    setActiveAstronautId(
+      savedProfile === "unassigned"
+        ? null
+        : profiles.find((p) => p.id === savedProfile)?.id
+          ?? profiles[0]?.id
+          ?? null,
+    );
+
+    setStorageReady(true);
+  })
+  .catch((e) => setStorageError(e.message));
     const stopOffline = monitorOffline(setReady, setOfflineError);
     return () => {
       stopOffline();
@@ -107,6 +155,24 @@ export default function Home() {
   function showView(next: View) {
     setView(next);
   }
+  function selectAstronaut(id: string | null) {
+  if (id !== null && !astronauts.some((p) => p.id === id))
+    return;
+
+  setActiveAstronautId(id);
+  setHistoryPage(0);
+
+  try {
+    localStorage.setItem(
+      "active-astronaut",
+      id ?? "unassigned",
+    );
+  } catch {
+    setNotice(
+      "Profile switched, but selection could not be saved.",
+    );
+  }
+}
   function navigate(next: View, track = true) {
     if (dirty && !window.confirm("Discard unsaved entries and notes?"))
       return false;
@@ -133,11 +199,16 @@ export default function Home() {
       setViewHistory((history) => history.slice(0, -1));
   }
   async function save() {
+    if (!astronauts.length) {
+  setError("Crew profiles are not available yet.");
+  return;
+}
     setBusy(true);
     setError("");
     try {
       const record: Reading = {
         id: crypto.randomUUID(),
+        astronautId: activeAstronautId ?? undefined,
         kind: kind as Reading["kind"],
         value: kind === "Blood pressure" ? `${first} / ${second}` : first,
         unit: UNITS[kind],
@@ -172,10 +243,15 @@ export default function Home() {
     }
   }
   async function saveIncident() {
+    if (!astronauts.length) {
+      setError("Crew profiles are not available yet.");
+      return;
+    }
     setBusy(true);
     try {
       const incident = {
         id: crypto.randomUUID(),
+        astronautId: activeAstronautId ?? undefined,
         timestamp: new Date().toISOString(),
         notes: note,
       };
@@ -206,8 +282,8 @@ export default function Home() {
             {
               schema: 1,
               exportedAt: new Date().toISOString(),
-              readings: records,
-              incidents,
+              readings: allRecords,
+              incidents: allIncidents,
               wellness,
             },
             null,
@@ -246,12 +322,12 @@ export default function Home() {
     setReview(true);
   }
   const historyRows = useMemo(
-    () =>
-      [...records, ...samples].sort(
-        (a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp),
-      ),
-    [records],
-  );
+  () =>
+    [...records].sort(
+      (a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp),
+    ),
+  [records],
+);
   const previousById = useMemo(() => {
     const result = new Map<string, Reading>();
     for (const k of METRICS) {
@@ -316,6 +392,7 @@ export default function Home() {
               </h1>
               <p>{view === "Dashboard" ? "Choose what you need." : ""}</p>
             </div>
+            
             {view !== "Dashboard" && (
               <button
                 className="back console-back"
@@ -324,6 +401,23 @@ export default function Home() {
                 title="Back"
               >
                 <Icon name="back" size={26} />
+              </button>
+            )}
+          </div>
+          <div className="active-profile-bar">
+            <span>
+              Active astronaut:{" "}
+              <strong>
+                {activeAstronaut?.name ?? "Unassigned"}
+              </strong>
+            </span>
+
+            {view !== "Crew overview" && (
+              <button
+                className="secondary"
+                onClick={() => navigate("Crew overview")}
+              >
+                Switch profile
               </button>
             )}
           </div>
@@ -444,8 +538,12 @@ export default function Home() {
           )}
           {view === "Crew overview" && (
             <CrewOverview
-              recordCount={records.length}
+              astronauts={astronauts}
+              activeAstronautId={activeAstronautId}
+              records={allRecords}
+              onSelect={selectAstronaut}
               onHistory={() => navigate("Health history")}
+              onMeasure={() => navigate("Measurements")}
             />
           )}
           {view === "Device & data" && (
@@ -643,7 +741,7 @@ export default function Home() {
           )}
           {view === "Health history" && (
             <>
-              <Trends records={[...samples, ...records]} />
+              <Trends records={records} />
               <section className="panel">
                 <div className="section-heading">
                   <h2>Saved health readings</h2>

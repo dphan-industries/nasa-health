@@ -1,114 +1,191 @@
 "use client";
-import { useState } from "react";
-const crew = [
-  {
-    name: "Viet Phan",
-    role: "Commander",
-    bio: "Computer science graduate with 6+ years of software engineering experience, specializing in frontend development. Leads application engineering and interface implementation.",
-    initials: "VP",
-    pulse: 68,
-    bp: "118 / 76",
-    temperature: "36.7",
-    glucose: 94,
-    sleep: 7.5,
-    mood: "Good",
-    note: "Demo observation for interface testing. No personal health data has been entered.",
-  },
-  {
-    name: "Edsel Ong",
-    role: "Systems Engineer",
-    bio: "Computer science student contributing to application development and engineering.",
-    initials: "EO",
-    pulse: 74,
-    bp: "122 / 80",
-    temperature: "36.8",
-    glucose: 102,
-    sleep: 6.5,
-    mood: "Neutral",
-    note: "Demo observation for interface testing. No personal health data has been entered.",
-  },
-  {
-    name: "Vicki Leow",
-    role: "Habitat Designer",
-    bio: "Art diploma graduate from Singapore. Leads artwork and visual design, with a focus on making the crew environment feel welcoming and comfortable.",
-    initials: "VL",
-    pulse: 92,
-    bp: "130 / 84",
-    temperature: "37.0",
-    glucose: 108,
-    sleep: 7,
-    mood: "Good",
-    note: "Demo observation for interface testing. No personal health data has been entered.",
-  },
-];
+
+import type {
+  Astronaut,
+  Reading,
+} from "../../lib/storage";
+
+function latestReading(
+  records: Reading[],
+  astronautId: string | null,
+  kind: Reading["kind"],
+) {
+  return records
+    .filter(
+      (r) =>
+        (r.astronautId ?? null) === astronautId &&
+        r.kind === kind,
+    )
+    .sort(
+      (a, b) =>
+        Date.parse(b.timestamp) - Date.parse(a.timestamp),
+    )[0];
+}
+
 export default function CrewOverview({
-  recordCount,
+  astronauts,
+  activeAstronautId,
+  records,
+  onSelect,
   onHistory,
+  onMeasure,
 }: {
-  recordCount: number;
+  astronauts: Astronaut[];
+  activeAstronautId: string | null;
+  records: Reading[];
+  onSelect: (id: string | null) => void;
   onHistory: () => void;
+  onMeasure: () => void;
 }) {
-  const [selected, setSelected] = useState(0);
-  const person = crew[selected];
+  const person = astronauts.find(
+    (p) => p.id === activeAstronautId,
+  );
+
+  const personalRecords = records.filter(
+    (r) =>
+      (r.astronautId ?? null) === activeAstronautId,
+  );
+
+  const metrics: Reading["kind"][] = [
+    "Heart rate",
+    "Blood pressure",
+    "Body temperature",
+    "Blood glucose",
+  ];
+
   return (
     <section className="crew-overview">
       <div className="crew-overview-heading">
         <div>
           <h2>Crew health records</h2>
-          <p>Team roster · sample health values for demonstration only.</p>
+          <p>
+            Select an astronaut to view their saved
+            health measurements.
+          </p>
         </div>
-        <button className="secondary" onClick={onHistory}>
-          Saved history · {recordCount} readings
+
+        <button
+          className="secondary"
+          onClick={onHistory}
+        >
+          Saved history · {personalRecords.length} readings
         </button>
       </div>
-      <div className="crew-roster" aria-label="Team members">
-        {crew.map((member, index) => (
-          <button
-            key={member.name}
-            className={
-              selected === index ? "crew-person selected" : "crew-person"
-            }
-            aria-pressed={selected === index}
-            onClick={() => setSelected(index)}
-          >
-            <span className="crew-initials" aria-hidden="true">
-              {member.initials}
-            </span>
-            <strong>{member.name}</strong>
-            <span>{member.role}</span>
-            <small>
-              Demo · {member.pulse} bpm · {member.sleep} h sleep
-            </small>
-          </button>
-        ))}
+
+      <div
+        className="crew-roster"
+        aria-label="Team members"
+      >
+        {astronauts.map((member) => {
+          const pulse = latestReading(
+            records,
+            member.id,
+            "Heart rate",
+          );
+
+          return (
+            <button
+              key={member.id}
+              className={
+                activeAstronautId === member.id
+                  ? "crew-person selected"
+                  : "crew-person"
+              }
+              aria-pressed={
+                activeAstronautId === member.id
+              }
+              onClick={() => onSelect(member.id)}
+            >
+              <span
+                className="crew-initials"
+                aria-hidden="true"
+              >
+                {member.initials}
+              </span>
+
+              <strong>{member.name}</strong>
+              <span>{member.role}</span>
+
+              <small>
+                {pulse
+                  ? `${pulse.value} ${pulse.unit} · ${pulse.source}`
+                  : "No heart rate recorded"}
+              </small>
+            </button>
+          );
+        })}
       </div>
-      <div className="panel crew-detail" aria-live="polite">
-        <div className="eyebrow">DEMO VALUES · NOT PERSONAL HEALTH DATA</div>
-        <h2>{person.name}</h2>
-        <p>{person.role}</p>
-        <p>{person.bio}</p>
+
+      <button
+        className="secondary"
+        aria-pressed={activeAstronautId === null}
+        onClick={() => onSelect(null)}
+      >
+        View unassigned records
+      </button>
+
+      <div
+        className="panel crew-detail"
+        aria-live="polite"
+      >
+        <div className="eyebrow">
+          DEVICE-LOCAL HEALTH RECORDS
+        </div>
+
+        <h2>{person?.name ?? "Unassigned records"}</h2>
+
+        <p>{person?.role}</p>
+        <p>
+          {person?.bio ??
+            "Records without an assigned astronaut are kept here."}
+        </p>
+
         <dl className="crew-vitals">
-          {[
-            ["Heart rate", `${person.pulse} bpm`],
-            ["Blood pressure", `${person.bp} mmHg`],
-            ["Temperature", `${person.temperature} °C`],
-            ["Blood glucose", `${person.glucose} mg/dL`],
-            ["Sleep", `${person.sleep} hours`],
-            ["Mood", person.mood],
-          ].map(([label, value]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
-            </div>
-          ))}
+          {metrics.map((kind) => {
+            const reading = latestReading(
+              records,
+              activeAstronautId,
+              kind,
+            );
+
+            return (
+              <div key={kind}>
+                <dt>{kind}</dt>
+                <dd>
+                  {reading
+                    ? `${reading.value} ${reading.unit}`
+                    : "Not recorded"}
+                </dd>
+
+                {reading && (
+                  <small>{reading.source}</small>
+                )}
+              </div>
+            );
+          })}
         </dl>
-        <h3>Check-in note</h3>
-        <p>{person.note}</p>
-        <small>
-          These values do not establish fitness or safety. Your saved readings
-          stay separate in Saved history. This prototype does not connect or
-          synchronize multiple crew devices.
-        </small>
+
+        <div className="actions">
+          <button
+            className="primary"
+            onClick={onMeasure}
+          >
+            Record vitals
+          </button>
+
+          <button
+            className="secondary"
+            onClick={onHistory}
+          >
+            View health history
+          </button>
+        </div>
+
+        <p className="fine-print">
+          Measurements are stored on this device.
+          Missing values remain unknown. Recorded values
+          do not establish medical fitness or safety.
+        </p>
       </div>
     </section>
   );

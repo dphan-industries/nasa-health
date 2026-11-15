@@ -81,7 +81,7 @@ test("version 1 database migrates without losing saved readings", async () => {
     req.onerror = reject;
   });
   const db = await openDatabase();
-  assert.equal(db.version, 2);
+  assert.equal(db.version, 3);
   assert.ok(db.objectStoreNames.contains("resources"));
   db.close();
   assert.equal((await readRecords("readings"))[0].id, "r1");
