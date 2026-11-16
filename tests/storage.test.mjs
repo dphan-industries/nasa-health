@@ -2,10 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { IDBFactory } from "fake-indexeddb";
 import {
-  validateReading,
   openDatabase,
-  saveRecord,
+  validateReading,
+  validateNewReading,
   readRecords,
+  saveRecord,
+  readRecordsForAstronaut,
 } from "../lib/storage.ts";
 test("validation accepts formats without clinical interpretation", () => {
   assert.equal(validateReading("Heart rate", "68", ""), "");
@@ -18,11 +20,12 @@ test("validation accepts formats without clinical interpretation", () => {
 test("versioned database persists readings and incidents across connections", async () => {
   globalThis.indexedDB = new IDBFactory();
   const db = await openDatabase();
-  assert.equal(db.version, 2);
+  assert.equal(db.version, 3);
   assert.deepEqual(
-    [...db.objectStoreNames],
-    ["incidents", "preferences", "readings", "resources", "wellness"],
-  );
+  [...db.objectStoreNames],
+  ["astronauts", "incidents", "preferences",
+    "readings", "resources", "wellness"],
+);
   db.close();
   const reading = {
     id: "fictional",
@@ -86,4 +89,195 @@ test("aborted write transactions do not persist or report success", async () => 
     IDBDatabase.prototype.transaction = original;
   }
   assert.deepEqual(await readRecords("readings"), []);
+});
+
+test("astronaut readings remain isolated", async () => {
+  globalThis.indexedDB = new IDBFactory();
+
+  const base = {
+    kind: "Heart rate",
+    unit: "bpm",
+    timestamp: "2026-11-15T10:00:00Z",
+    note: "",
+    source: "Manual entry",
+  };
+
+  await saveRecord("readings", {
+    ...base,
+    id: "reading-1",
+    astronautId: "edsel-ong",
+    value: "85",
+  });
+
+  await saveRecord("readings", {
+    ...base,
+    id: "reading-2",
+    astronautId: "viet-phan",
+    value: "72",
+  });
+
+  await saveRecord("readings", {
+    ...base,
+    id: "legacy-reading",
+    value: "68",
+  });
+
+  const edsel = await readRecordsForAstronaut(
+    "readings",
+    "edsel-ong",
+  );
+
+  const viet = await readRecordsForAstronaut(
+    "readings",
+    "viet-phan",
+  );
+
+  const legacy = await readRecordsForAstronaut(
+    "readings",
+    null,
+  );
+
+  assert.equal(edsel.length, 1);
+  assert.equal(edsel[0].value, "85");
+
+  assert.equal(viet.length, 1);
+  assert.equal(viet[0].value, "72");
+
+  assert.equal(legacy.length, 1);
+  assert.equal(legacy[0].value, "68");
+});
+
+test("astronaut wellbeing records remain isolated", async () => {
+  globalThis.indexedDB = new IDBFactory();
+
+  const base = {
+    timestamp: "2026-11-15T10:00:00Z",
+    bodyArea: "No area",
+    note: "",
+  };
+
+  await saveRecord("wellness", {
+    ...base,
+    id: "wellness-edsel",
+    astronautId: "edsel-ong",
+    sleep: "7.5",
+    mood: "Good",
+  });
+
+  await saveRecord("wellness", {
+    ...base,
+    id: "wellness-viet",
+    astronautId: "viet-phan",
+    sleep: "5",
+    mood: "Low",
+  });
+
+  await saveRecord("wellness", {
+    ...base,
+    id: "wellness-legacy",
+    sleep: "8",
+    mood: "Neutral",
+  });
+
+  const edsel = await readRecordsForAstronaut(
+    "wellness",
+    "edsel-ong",
+  );
+
+  const viet = await readRecordsForAstronaut(
+    "wellness",
+    "viet-phan",
+  );
+
+  const legacy = await readRecordsForAstronaut(
+    "wellness",
+    null,
+  );
+
+  assert.equal(edsel.length, 1);
+  assert.equal(edsel[0].sleep, "7.5");
+  assert.equal(edsel[0].mood, "Good");
+
+  assert.equal(viet.length, 1);
+  assert.equal(viet[0].sleep, "5");
+  assert.equal(viet[0].mood, "Low");
+
+  assert.equal(legacy.length, 1);
+  assert.equal(legacy[0].sleep, "8");
+});
+test("astronaut medical follow-ups remain isolated", async () => {
+  globalThis.indexedDB = new IDBFactory();
+
+  const timestamp = "2026-11-16T01:00:00Z";
+
+  await saveRecord("incidents", {
+    id: "followup-edsel",
+    astronautId: "edsel-ong",
+    timestamp,
+    notes: "Edsel fictional follow-up",
+  });
+
+  await saveRecord("incidents", {
+    id: "followup-viet",
+    astronautId: "viet-phan",
+    timestamp,
+    notes: "Viet fictional follow-up",
+  });
+
+  await saveRecord("incidents", {
+    id: "followup-legacy",
+    timestamp,
+    notes: "Unassigned legacy incident",
+  });
+
+  const edsel = await readRecordsForAstronaut(
+    "incidents",
+    "edsel-ong",
+  );
+
+  const viet = await readRecordsForAstronaut(
+    "incidents",
+    "viet-phan",
+  );
+
+  const legacy = await readRecordsForAstronaut(
+    "incidents",
+    null,
+  );
+
+  assert.equal(edsel.length, 1);
+  assert.equal(edsel[0].notes, "Edsel fictional follow-up");
+
+  assert.equal(viet.length, 1);
+  assert.equal(viet[0].notes, "Viet fictional follow-up");
+
+  assert.equal(legacy.length, 1);
+  assert.equal(legacy[0].notes, "Unassigned legacy incident");
+});
+test("new blood pressure readings require systolic above diastolic", () => {
+  assert.equal(
+    validateNewReading("Blood pressure", "120", "80"),
+    "",
+  );
+
+  assert.equal(
+    validateNewReading("Blood pressure", "181", "121"),
+    "",
+  );
+
+  for (const [first, second] of [
+    ["60", "70"],
+    ["50", "56"],
+    ["80", "80"],
+    ["120", ""],
+  ]) {
+    assert.ok(
+      validateNewReading("Blood pressure", first, second),
+    );
+  }
+
+  assert.equal(
+    validateNewReading("Heart rate", "91", ""),
+    "",
+  );
 });

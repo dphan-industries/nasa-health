@@ -72,6 +72,18 @@ export function assessReading(
       SOURCES.nasa,
     );
   if (reading.kind === "Blood pressure") {
+    if (a <= 0 || b <= 0 || a <= b)
+      return result(
+        "review",
+        "Invalid blood pressure measurement",
+        "Systolic pressure must be greater than diastolic pressure. The saved values may have been entered incorrectly or require measurement verification.",
+        [
+          "Check the original device reading and confirm the order of the two values.",
+          "Repeat the measurement using the approved procedure. Symptoms take priority over numerical readings.",
+        ],
+        SOURCES.bp,
+      );
+
     if (a > 180 || b > 120)
       return result(
         "urgent",

@@ -4,10 +4,13 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import {
   Reading,
   Incident,
+  type Astronaut,
+  type Wellness,
   readRecords,
   saveRecord,
-  validateReading,
+  validateNewReading,
 } from "../lib/storage";
+import { loadAstronauts } from "../lib/astronauts";
 import { monitorOffline } from "../lib/offline";
 import Icon from "./components/console-icon";
 import NumberControl from "./components/number-control";
@@ -24,7 +27,7 @@ import EmergencyGuide from "./components/emergency-guide";
 import MeasurementInstructions from "./components/measurement-instructions";
 import { METRICS, UNITS, assessReading } from "../lib/health";
 import { orderedReadings } from "../lib/insights";
-import { samples, guides } from "../lib/content";
+import { guides } from "../lib/content";
 type View =
   | "Dashboard"
   | "Measurements"
@@ -41,8 +44,43 @@ export default function Home() {
   const [view, setView] = useState<View>("Dashboard");
   const [historyPage, setHistoryPage] = useState(0);
   const [viewHistory, setViewHistory] = useState<View[]>([]);
-  const [records, setRecords] = useState<Reading[]>([]);
-  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [allRecords, setRecords] = useState<Reading[]>([]);
+  const [allIncidents, setIncidents] = useState<Incident[]>([]);
+  const [allWellness, setAllWellness] = useState<Wellness[]>([]);
+
+  const [astronauts, setAstronauts] = useState<Astronaut[]>([]);
+
+  const [activeAstronautId, setActiveAstronautId] =
+    useState<string | null>(null);
+
+  const activeAstronaut = astronauts.find(
+    (p) => p.id === activeAstronautId,
+  );
+
+  const records = useMemo(
+    () =>
+      allRecords.filter(
+        (r) => (r.astronautId ?? null) === activeAstronautId,
+      ),
+    [allRecords, activeAstronautId],
+  );
+
+  const incidents = useMemo(
+    () =>
+      allIncidents.filter(
+        (i) => (i.astronautId ?? null) === activeAstronautId,
+      ),
+    [allIncidents, activeAstronautId],
+  );
+
+  const wellness = useMemo(
+    () =>
+      allWellness.filter(
+        (r) => (r.astronautId ?? null) === activeAstronautId,
+      ),
+    [allWellness, activeAstronautId],
+  );
+
   const [cacheReady, setReady] = useState(false);
   const [storageReady, setStorageReady] = useState(false);
   const [storageError, setStorageError] = useState("");
@@ -75,15 +113,38 @@ export default function Home() {
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
     Promise.all([
-      readRecords<Reading>("readings"),
-      readRecords<Incident>("incidents"),
-    ])
-      .then(([readings, savedIncidents]) => {
-        setRecords(readings);
-        setIncidents(savedIncidents);
-        setStorageReady(true);
-      })
-      .catch((e) => setStorageError(e.message));
+  readRecords<Reading>("readings"),
+  readRecords<Incident>("incidents"),
+  loadAstronauts(),
+  readRecords<Wellness>("wellness"),
+])
+  .then(([readings, savedIncidents, profiles, savedWellness]) => {
+    setRecords(readings);
+    setIncidents(savedIncidents);
+    setAstronauts(profiles);
+    setAllWellness(savedWellness);
+
+    let savedProfile: string | null = null;
+
+    try {
+      savedProfile = localStorage.getItem(
+        "active-astronaut",
+      );
+    } catch {
+      // Profile selection will use the default.
+    }
+
+    setActiveAstronautId(
+      savedProfile === "unassigned"
+        ? null
+        : profiles.find((p) => p.id === savedProfile)?.id
+          ?? profiles[0]?.id
+          ?? null,
+    );
+
+    setStorageReady(true);
+  })
+  .catch((e) => setStorageError(e.message));
     const stopOffline = monitorOffline(setReady, setOfflineError);
     return () => {
       stopOffline();
@@ -107,6 +168,24 @@ export default function Home() {
   function showView(next: View) {
     setView(next);
   }
+  function selectAstronaut(id: string | null) {
+  if (id !== null && !astronauts.some((p) => p.id === id))
+    return;
+
+  setActiveAstronautId(id);
+  setHistoryPage(0);
+
+  try {
+    localStorage.setItem(
+      "active-astronaut",
+      id ?? "unassigned",
+    );
+  } catch {
+    setNotice(
+      "Profile switched, but selection could not be saved.",
+    );
+  }
+}
   function navigate(next: View, track = true) {
     if (dirty && !window.confirm("Discard unsaved entries and notes?"))
       return false;
@@ -133,11 +212,28 @@ export default function Home() {
       setViewHistory((history) => history.slice(0, -1));
   }
   async function save() {
-    setBusy(true);
+  if (!astronauts.length) {
+    setError("Crew profiles are not available yet.");
+    return;
+  }
+
+  const validationError = validateNewReading(
+    kind,
+    first,
+    second,
+  );
+
+  if (validationError) {
+    setError(validationError);
+    return;
+  }
+
+  setBusy(true);
     setError("");
     try {
       const record: Reading = {
         id: crypto.randomUUID(),
+        astronautId: activeAstronautId ?? undefined,
         kind: kind as Reading["kind"],
         value: kind === "Blood pressure" ? `${first} / ${second}` : first,
         unit: UNITS[kind],
@@ -172,10 +268,15 @@ export default function Home() {
     }
   }
   async function saveIncident() {
+    if (!astronauts.length) {
+      setError("Crew profiles are not available yet.");
+      return;
+    }
     setBusy(true);
     try {
       const incident = {
         id: crypto.randomUUID(),
+        astronautId: activeAstronautId ?? undefined,
         timestamp: new Date().toISOString(),
         notes: note,
       };
@@ -198,45 +299,73 @@ export default function Home() {
     }
   }
   async function exportData() {
-    try {
-      const wellness = await readRecords("wellness");
-      const blob = new Blob(
-        [
-          JSON.stringify(
-            {
-              schema: 1,
-              exportedAt: new Date().toISOString(),
-              readings: records,
-              incidents,
-              wellness,
-            },
-            null,
-            2,
-          ),
-        ],
-        { type: "application/json" },
-      );
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "crew-health-report.json";
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (e) {
-      setError((e as Error).message);
-    }
-  }
-  async function reloadRecords() {
-    const [r, i] = await Promise.all([
+  try {
+    const [
+      savedAstronauts,
+      savedReadings,
+      savedIncidents,
+      savedWellness,
+    ] = await Promise.all([
+      readRecords<Astronaut>("astronauts"),
       readRecords<Reading>("readings"),
       readRecords<Incident>("incidents"),
+      readRecords<Wellness>("wellness"),
     ]);
-    setRecords(r);
-    setHistoryPage(0);
-    setIncidents(i);
+
+    const report = {
+      schema: 2,
+      exportedAt: new Date().toISOString(),
+      astronauts: savedAstronauts,
+      readings: savedReadings,
+      incidents: savedIncidents,
+      wellness: savedWellness,
+    };
+
+    const blob = new Blob(
+      [JSON.stringify(report, null, 2)],
+      { type: "application/json" },
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = "crew-health-backup.json";
+    a.click();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (e) {
+    setError((e as Error).message);
   }
+}
+     
+  async function reloadRecords() {
+  const [r, i, w, profiles] = await Promise.all([
+    readRecords<Reading>("readings"),
+    readRecords<Incident>("incidents"),
+    readRecords<Wellness>("wellness"),
+    readRecords<Astronaut>("astronauts"),
+  ]);
+
+  setRecords(r);
+  setIncidents(i);
+  setAllWellness(w);
+  setAstronauts(profiles);
+  setHistoryPage(0);
+}
   function reviewSensor(r: SensorReading) {
-    if (!navigate("Measurements")) return;
+  const validationError = validateNewReading(
+    r.kind,
+    r.first,
+    r.second,
+  );
+
+  if (validationError) {
+    setError(validationError);
+    return;
+  }
+
+  if (!navigate("Measurements")) return;
     setKind(r.kind);
     setFirst(r.first);
     setSecond(r.second);
@@ -246,12 +375,12 @@ export default function Home() {
     setReview(true);
   }
   const historyRows = useMemo(
-    () =>
-      [...records, ...samples].sort(
-        (a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp),
-      ),
-    [records],
-  );
+  () =>
+    [...records].sort(
+      (a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp),
+    ),
+  [records],
+);
   const previousById = useMemo(() => {
     const result = new Map<string, Reading>();
     for (const k of METRICS) {
@@ -316,6 +445,7 @@ export default function Home() {
               </h1>
               <p>{view === "Dashboard" ? "Choose what you need." : ""}</p>
             </div>
+            
             {view !== "Dashboard" && (
               <button
                 className="back console-back"
@@ -324,6 +454,23 @@ export default function Home() {
                 title="Back"
               >
                 <Icon name="back" size={26} />
+              </button>
+            )}
+          </div>
+          <div className="active-profile-bar">
+            <span>
+              Active astronaut:{" "}
+              <strong>
+                {activeAstronaut?.name ?? "Unassigned"}
+              </strong>
+            </span>
+
+            {view !== "Crew overview" && (
+              <button
+                className="secondary"
+                onClick={() => navigate("Crew overview")}
+              >
+                Switch profile
               </button>
             )}
           </div>
@@ -444,8 +591,13 @@ export default function Home() {
           )}
           {view === "Crew overview" && (
             <CrewOverview
-              recordCount={records.length}
+              astronauts={astronauts}
+              activeAstronautId={activeAstronautId}
+              records={allRecords}
+               wellness={allWellness}
+              onSelect={selectAstronaut}
               onHistory={() => navigate("Health history")}
+              onMeasure={() => navigate("Measurements")}
             />
           )}
           {view === "Device & data" && (
@@ -466,7 +618,7 @@ export default function Home() {
               <InstallApp ready={ready} />
               <Reminders />
               <button className="primary" onClick={exportData}>
-                Export health report
+                Export all crew data
               </button>
               <DataTransfer onImported={reloadRecords} />
               <p className="fine-print">
@@ -486,7 +638,7 @@ export default function Home() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    const message = validateReading(kind, first, second);
+                    const message = validateNewReading(kind, first, second);
                     setError(message);
                     if (!message) setReview(true);
                   }}
@@ -643,11 +795,11 @@ export default function Home() {
           )}
           {view === "Health history" && (
             <>
-              <Trends records={[...samples, ...records]} />
+              <Trends records={records} />
               <section className="panel">
                 <div className="section-heading">
                   <h2>Saved health readings</h2>
-                  <button onClick={exportData}>Export JSON ↗</button>
+                  <button onClick={exportData}>Export crew backup ↗</button>
                 </div>
                 <p>
                   Entries and source labels on this device. Exported files may
@@ -889,15 +1041,42 @@ export default function Home() {
             <Wearables onReview={reviewSensor} />
           </div>
           {view === "Mission health" && (
-            <MissionHealth
-              records={records}
-              onMeasure={() => navigate("Measurements")}
-              onEmergency={() => navigate("Emergency assist")}
-              onSaved={reloadRecords}
-              onDirty={setExtraDirty}
-            />
+            storageReady ? (
+              <MissionHealth
+                key={activeAstronautId ?? "unassigned"}
+                astronautId={activeAstronautId}
+                astronautName={activeAstronaut?.name ?? "Unassigned"}
+                records={records}
+                wellness={wellness}
+                incidents={incidents}
+                onMeasure={() => navigate("Measurements")}
+                onEmergency={() => navigate("Emergency assist")}
+                onSaved={(incident) =>
+                  setIncidents((previous) => [incident, ...previous])
+                }
+                onDirty={setExtraDirty}
+              />
+            ) : (
+              <p>Local health records are not available yet.</p>
+            )
           )}
-          {view === "Wellbeing" && <Wellbeing onDirty={setExtraDirty} />}
+          {view === "Wellbeing" && (
+              storageReady ? (
+                <Wellbeing
+                  key={activeAstronautId ?? "unassigned"}
+                  astronautId={activeAstronautId}
+                  astronautName={activeAstronaut?.name ?? "Unassigned"}
+                  records={wellness}
+                  vitals={records}
+                  onDirty={setExtraDirty}
+                  onSaved={(record) =>
+                    setAllWellness((previous) => [record, ...previous])
+                  }
+                />
+              ) : (
+                <p>Local health records are not available yet.</p>
+              )
+            )}
           {view === "Move the Moon" && <MoveTheMoon />}
           <footer>
             <span>

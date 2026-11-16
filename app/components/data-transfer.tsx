@@ -45,11 +45,26 @@ export default function DataTransfer({
       {pending && (
         <>
           <p>
-            {pending.readings.length} readings · {pending.incidents.length}{" "}
-            incidents · {pending.wellness.length} wellbeing entries. Review the
-            source file before merging. Reports may contain sensitive
-            observations.
+            Backup schema {pending.schema} ·{" "}
+            {pending.astronauts?.length ?? 0} astronaut profiles ·{" "}
+            {pending.readings.length} readings ·{" "}
+            {pending.incidents.length} incidents ·{" "}
+            {pending.wellness.length} wellbeing entries.
           </p>
+
+          <p>
+            Review the source file before merging. Reports may contain
+            sensitive observations. Existing profiles and records with
+            matching IDs will not be overwritten.
+          </p>
+
+          {pending.schema === 1 && (
+            <p className="fine-print">
+              Legacy backup: records without an astronaut ID remain
+              unassigned. Records with an astronaut ID require a matching
+              profile on this device.
+            </p>
+          )}
           <div className="actions">
             <button
               className="primary"
@@ -62,8 +77,8 @@ export default function DataTransfer({
                   await onImported();
                   setPending(null);
                   setMessage(
-                    "Report merged on this device. Duplicate record IDs were skipped.",
-                  );
+                  "Crew backup merged on this device. Existing profiles and records were preserved.",
+                );
                 } catch (e) {
                   setError((e as Error).message);
                 } finally {

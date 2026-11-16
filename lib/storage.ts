@@ -1,5 +1,14 @@
+export type Astronaut = {
+  id: string;
+  name: string;
+  role: string;
+  initials: string;
+  bio: string;
+  createdAt: string;
+};
 export type Reading = {
   id: string;
+  astronautId?: string;
   kind: "Heart rate" | "Blood pressure" | "Blood glucose" | "Body temperature";
   value: string;
   unit: string;
@@ -8,7 +17,7 @@ export type Reading = {
   source: "Manual entry" | "Bluetooth sensor" | "Simulated sensor";
   device?: string;
 };
-export type Incident = { id: string; timestamp: string; notes: string };
+export type Incident = { id: string; astronautId?: string; timestamp: string; notes: string };
 export function validateReading(
   kind: string,
   first: string,
@@ -40,11 +49,34 @@ export function validateReading(
     return "Use values from 1–999. This checks format only, not medical safety.";
   return "";
 }
+export function validateNewReading(
+  kind: string,
+  first: string,
+  second: string,
+): string {
+  const formatError = validateReading(
+    kind,
+    first,
+    second,
+  );
+
+  if (formatError) return formatError;
+
+  if (
+    kind === "Blood pressure" &&
+    Number(first) <= Number(second)
+  ) {
+    return "Systolic pressure must be greater than diastolic pressure. Check the measurement and try again.";
+  }
+
+  return "";
+}
 export function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("crew-health", 2);
+    const request = indexedDB.open("crew-health", 3);
     request.onupgradeneeded = () => {
       for (const name of [
+        "astronauts",
         "readings",
         "incidents",
         "wellness",
@@ -80,6 +112,19 @@ export async function readRecords<T>(store: string): Promise<T[]> {
     };
   });
 }
+export async function readRecordsForAstronaut<
+  T extends { astronautId?: string },
+>(
+  store: "readings" | "incidents" | "wellness",
+  astronautId: string | null,
+): Promise<T[]> {
+  const records = await readRecords<T>(store);
+
+  return records.filter(
+    (record) =>
+      (record.astronautId ?? null) === astronautId,
+  );
+}
 export async function saveRecord<T extends { id: string }>(
   store: string,
   record: T,
@@ -105,6 +150,7 @@ export async function saveRecord<T extends { id: string }>(
 
 export type Wellness = {
   id: string;
+  astronautId?: string;
   timestamp: string;
   sleep: string;
   mood: string;

@@ -1,31 +1,96 @@
-import type { Reading, Incident, Wellness } from "./storage.ts";
+import type {
+  Reading,
+  Incident,
+  Wellness,
+  Astronaut,
+} from "./storage.ts";
 import { UNITS, METRICS } from "./health.ts";
 import { validateReading, validateRoutine, openDatabase } from "./storage.ts";
 export type Transfer = {
-  schema: 1;
+  schema: 1 | 2;
+  astronauts?: Astronaut[];
   readings: Reading[];
   incidents: Incident[];
   wellness: Wellness[];
 };
+function validProfileId(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,199}$/.test(value) &&
+    value !== "unassigned"
+  );
+}
 export function parseTransfer(raw: string): Transfer {
   if (raw.length > 5 * 1024 * 1024)
     throw new Error("Report exceeds the 5 MB import limit.");
   const data = JSON.parse(raw);
   if (
-    !data ||
-    typeof data !== "object" ||
-    data.schema !== 1 ||
-    ![data.readings, data.incidents, data.wellness].every(Array.isArray)
-  )
-    throw new Error("Choose a Crew Health schema 1 report.");
+  !data ||
+  typeof data !== "object" ||
+  ![1, 2].includes(data.schema) ||
+  ![data.readings, data.incidents, data.wellness].every(Array.isArray)
+)
+  throw new Error("Choose a Crew Health schema 1 or 2 report.");
   const text = (v: unknown, max = 10000) =>
     typeof v === "string" && v.length <= max;
-  const base = (r: Record<string, unknown>) =>
-    r &&
-    text(r.id, 200) &&
-    (r.id as string).length > 0 &&
-    text(r.timestamp, 50) &&
-    Number.isFinite(Date.parse(r.timestamp as string));
+  
+  
+  const profileIds = new Set<string>();
+
+if (data.schema === 2) {
+  if (!Array.isArray(data.astronauts))
+    throw new Error(
+      "Schema 2 reports must include astronaut profiles.",
+    );
+
+  if (data.astronauts.length > 1000)
+    throw new Error(
+      "Report contains too many astronaut profiles.",
+    );
+
+  for (const profile of data.astronauts) {
+    if (
+      !profile ||
+      typeof profile !== "object" ||
+      !validProfileId(profile.id) ||
+      !text(profile.name, 100) ||
+      !profile.name.trim() ||
+      !text(profile.role, 100) ||
+      !profile.role.trim() ||
+      !text(profile.initials, 10) ||
+      !profile.initials.trim() ||
+      !text(profile.bio, 10000) ||
+      !text(profile.createdAt, 50) ||
+      !Number.isFinite(Date.parse(profile.createdAt))
+    ) {
+      throw new Error("Invalid astronaut profile in report.");
+    }
+
+    if (profileIds.has(profile.id))
+      throw new Error(
+        "Report contains duplicate astronaut IDs.",
+      );
+
+    profileIds.add(profile.id);
+  }
+}
+
+const base = (r: Record<string, unknown>) =>
+  r &&
+  text(r.id, 200) &&
+  (r.id as string).length > 0 &&
+  text(r.timestamp, 50) &&
+  Number.isFinite(Date.parse(r.timestamp as string)) &&
+  (
+    r.astronautId === undefined ||
+    (
+      validProfileId(r.astronautId) &&
+      (
+        data.schema === 1 ||
+        profileIds.has(r.astronautId)
+      )
+    )
+  );
   for (const store of ["readings", "incidents", "wellness"] as const) {
     const ids = data[store].map((r: { id?: string } | null) => r?.id);
     if (new Set(ids).size !== ids.length)
@@ -79,31 +144,98 @@ export function parseTransfer(raw: string): Transfer {
   return data;
 }
 export async function importTransfer(data: Transfer) {
+  const report = parseTransfer(JSON.stringify(data));
+
   const db = await openDatabase();
+
   return new Promise<void>((resolve, reject) => {
     const tx = db.transaction(
-      ["readings", "incidents", "wellness"],
+      ["astronauts", "readings", "incidents", "wellness"],
       "readwrite",
     );
-    for (const store of ["readings", "incidents", "wellness"] as const) {
-      for (const record of data[store]) {
-        const request = tx.objectStore(store).get(record.id);
-        request.onsuccess = () => {
-          if (!request.result) tx.objectStore(store).add(record);
-        };
-      }
-    }
+
+    let failure = "Import failed. No records were merged.";
+
     tx.oncomplete = () => {
       db.close();
       resolve();
     };
+
     tx.onabort = () => {
       db.close();
-      reject(new Error("Import failed. No records were merged."));
+      reject(new Error(failure));
     };
-    tx.onerror = () => {
-      db.close();
-      reject(new Error("Import failed. Check available storage."));
+
+    const astronautStore = tx.objectStore("astronauts");
+
+    const request = astronautStore.getAll();
+
+    request.onsuccess = () => {
+      const existingProfiles = request.result as Astronaut[];
+
+      const knownIds = new Set(
+        existingProfiles.map((profile) => profile.id),
+      );
+
+      const incomingProfiles =
+        report.schema === 2
+          ? report.astronauts ?? []
+          : [];
+
+      for (const profile of incomingProfiles) {
+        knownIds.add(profile.id);
+      }
+
+      // Validate ownership before writing anything.
+      for (const store of [
+        "readings",
+        "incidents",
+        "wellness",
+      ] as const) {
+        for (const record of report[store]) {
+          if (
+            record.astronautId !== undefined &&
+            !knownIds.has(record.astronautId)
+          ) {
+            failure =
+              `Unknown astronaut profile: ${record.astronautId}. ` +
+              "Import a backup containing that profile first.";
+
+            tx.abort();
+            return;
+          }
+        }
+      }
+
+      const existingIds = new Set(
+        existingProfiles.map((profile) => profile.id),
+      );
+
+      // Import new profiles without overwriting existing ones.
+      for (const profile of incomingProfiles) {
+        if (!existingIds.has(profile.id)) {
+          astronautStore.add(profile);
+        }
+      }
+
+      // Import new health records without overwriting existing IDs.
+      for (const store of [
+        "readings",
+        "incidents",
+        "wellness",
+      ] as const) {
+        const objectStore = tx.objectStore(store);
+
+        for (const record of report[store]) {
+          const existing = objectStore.get(record.id);
+
+          existing.onsuccess = () => {
+            if (!existing.result) {
+              objectStore.add(record);
+            }
+          };
+        }
+      }
     };
   });
 }

@@ -17,16 +17,24 @@ import {
   type Environment,
 } from "../../lib/health";
 export default function MissionHealth({
+  astronautId,
+  astronautName,
   records,
+  wellness,
+  incidents,
   onMeasure,
   onEmergency,
   onSaved,
   onDirty,
 }: {
+  astronautId: string | null;
+  astronautName: string;
   records: Reading[];
+  wellness: Wellness[];
+  incidents: Incident[];
   onMeasure: () => void;
   onEmergency: () => void;
-  onSaved: () => Promise<void>;
+  onSaved: (incident: Incident) => void;
   onDirty: (dirty: boolean) => void;
 }) {
   const [environment, setEnvironment] = useState<Environment>("Spacecraft");
@@ -79,65 +87,104 @@ export default function MissionHealth({
     }
   }
   async function logAction() {
-    if (!action.trim()) {
-      setError("Describe the action or follow-up before saving.");
-      return;
-    }
-    setBusy(true);
-    try {
-      await saveRecord("incidents", {
-        id: crypto.randomUUID(),
-        timestamp: new Date().toISOString(),
-        notes: `Assessment follow-up — ${selected}\nEnvironment: ${environment}\nSymptoms reported: ${symptoms.join(", ") || "None selected; not a medical clearance"}\nAction: ${action}\nOutcome / next check: ${outcome}\nEducational decision support, not a diagnosis.`,
-      });
-      await onSaved();
-      setAction("");
-      setOutcome("");
-      setMessage("Follow-up saved in Health history incident and action logs.");
-      setError("");
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
-    }
+  if (!action.trim()) {
+    setError("Describe the action or follow-up before saving.");
+    return;
   }
-  async function exportHandoff() {
-    try {
-      const [wellness, incidents] = await Promise.all([
-        readRecords<Wellness>("wellness"),
-        readRecords<Incident>("incidents"),
-      ]);
-      const checkin = wellness.sort((a, b) =>
-        b.timestamp.localeCompare(a.timestamp),
-      )[0];
-      const followups = incidents
-        .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-        .slice(0, 3);
-      const latest = METRICS.map((k) => recent(k)[0]).filter(Boolean);
-      const text = `CREW HEALTH — MANUAL MEDICAL HANDOFF\nCreated: ${new Date().toISOString()}\nEnvironment: ${environment}\nSymptoms: ${symptoms.join(", ") || "None selected (not a safety assessment)"}\n${latest.map((r) => `${r.kind}: ${r.value} ${r.unit} | ${r.timestamp} | ${r.source} | ${r.note}`).join("\n")}\nAction: ${action || "Not recorded"}\nOutcome / follow-up: ${outcome || "Not recorded"}\nEducational prototype; no diagnosis or transmission. Missing values are unknown.`;
-      const combined =
-        text +
-        (checkin
-          ? `\nLatest wellbeing (${checkin.timestamp}): sleep ${checkin.sleep} h; mood ${checkin.mood}; ${checkin.bodyArea}; ${checkin.note}\nRoutine: ${JSON.stringify(checkin.routine || {})}`
-          : "\nNo wellbeing entry available.") +
-        `\nRecent saved incident / follow-up logs:\n${followups.map((i) => i.timestamp + " — " + i.notes).join("\n") || "None"}`;
-      const url = URL.createObjectURL(
-        new Blob([combined], { type: "text/plain" }),
-      );
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "crew-medical-handoff.txt";
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (e) {
-      setError((e as Error).message);
-    }
+
+  setBusy(true);
+
+  try {
+    const incident: Incident = {
+      id: crypto.randomUUID(),
+      astronautId: astronautId ?? undefined,
+      timestamp: new Date().toISOString(),
+      notes: `Assessment follow-up — ${selected}\nEnvironment: ${environment}\nSymptoms reported: ${symptoms.join(", ") || "None selected; not a medical clearance"}\nAction: ${action}\nOutcome / next check: ${outcome}\nEducational decision support, not a diagnosis.`,
+    };
+
+    await saveRecord("incidents", incident);
+    onSaved(incident);
+
+    setAction("");
+    setOutcome("");
+
+    setMessage(
+      `Follow-up saved for ${astronautName} in Health history.`,
+    );
+
+    setError("");
+  } catch (e) {
+    setError((e as Error).message);
+  } finally {
+    setBusy(false);
   }
+}
+  function exportHandoff() {
+  try {
+    const checkin = [...wellness].sort(
+      (a, b) =>
+        Date.parse(b.timestamp) - Date.parse(a.timestamp),
+    )[0];
+
+    const followups = [...incidents]
+      .sort(
+        (a, b) =>
+          Date.parse(b.timestamp) - Date.parse(a.timestamp),
+      )
+      .slice(0, 3);
+
+    const latest = METRICS.map(
+      (k) => recent(k)[0],
+    ).filter(Boolean);
+
+    const text = `CREW HEALTH — MANUAL MEDICAL HANDOFF
+Astronaut: ${astronautName}
+Profile ID: ${astronautId ?? "Unassigned"}
+Created: ${new Date().toISOString()}
+Environment: ${environment}
+Symptoms: ${symptoms.join(", ") || "None selected (not a safety assessment)"}
+
+LATEST HEALTH INDICATORS
+${latest.map((r) => `${r.kind}: ${r.value} ${r.unit} | ${r.timestamp} | ${r.source} | ${r.note}`).join("\n") || "No readings available."}
+
+Action: ${action || "Not recorded"}
+Outcome / follow-up: ${outcome || "Not recorded"}
+
+Educational prototype; no diagnosis or transmission. Missing values are unknown.`;
+
+    const combined =
+      text +
+      (checkin
+        ? `\n\nLATEST WELLBEING CHECK-IN\nTimestamp: ${checkin.timestamp}\nSleep: ${checkin.sleep} h\nMood: ${checkin.mood}\nBody area: ${checkin.bodyArea}\nObservation: ${checkin.note || "None"}\nRoutine: ${JSON.stringify(checkin.routine || {})}`
+        : "\n\nNo wellbeing entry available.") +
+      `\n\nRECENT SAVED INCIDENTS / FOLLOW-UPS\n${followups.map((i) => i.timestamp + " — " + i.notes).join("\n") || "None"}`;
+
+    const url = URL.createObjectURL(
+      new Blob([combined], { type: "text/plain" }),
+    );
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `crew-medical-handoff-${astronautId ?? "unassigned"}.txt`;
+    a.click();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (e) {
+    setError((e as Error).message);
+  }
+}
   return (
     <div className="mission-health">
       <section className="panel">
-        <div className="eyebrow">ASSESS · UNDERSTAND · ACT · FOLLOW UP</div>
+        <div className="eyebrow">
+          ASSESS · UNDERSTAND · ACT · FOLLOW UP
+        </div>
+
         <h2>Mission context</h2>
+
+        <p>
+          Active astronaut: <strong>{astronautName}</strong>
+        </p>
         <p>
           Adult Earth reference guidance, adapted with mission-context cautions.
           This is an educational prototype, not a diagnosis or an approved
@@ -215,7 +262,8 @@ export default function MissionHealth({
           </button>
         </div>
         <p className="fine-print">
-          Handoff downloads may contain sensitive data; nothing is sent
+          This handoff contains health records for {astronautName} only.
+          Downloads may contain sensitive data; nothing is sent
           automatically.
         </p>
       </section>
@@ -303,9 +351,17 @@ export default function MissionHealth({
                     setSelected(
                       `${kind}: ${r.value} ${r.unit} (${r.timestamp})`,
                     );
+
                     setMessage(
                       "Follow-up target selected. Complete the action log below.",
                     );
+
+                    document
+                      .getElementById("follow-up-log")
+                      ?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
                   }}
                 >
                   Log a follow-up for {kind.toLowerCase()}
@@ -315,9 +371,13 @@ export default function MissionHealth({
           })}
         </div>
       </section>
-      <section className="panel">
-        <h2>Action and follow-up log</h2>
-        <p>{selected}</p>
+      <section
+  className="panel"
+  id="follow-up-log"
+  style={{ scrollMarginTop: "100px" }}
+>
+  <h2>Action and follow-up log</h2>
+  <p>{selected}</p>
         <label>
           Action taken or planned
           <textarea
