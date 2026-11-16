@@ -1,5 +1,6 @@
-const CACHE = "crew-health-v30";
+const CACHE = "crew-health-v31";
 const BASE = [
+  "/brand/deep-space-logo.png",
   "/brand/deep-space-background.svg",
   "/brand/space-apps-color-white.svg",
   "/fonts/fira-sans-latin-700-normal.woff2",

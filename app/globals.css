@@ -3474,25 +3474,25 @@ body:has(.quiet-mode) .global-emergency {
 @font-face { font-family:Overpass; src:url('/fonts/overpass-latin-700-normal.woff2') format('woff2'); font-weight:700; font-display:swap; }
 @font-face { font-family:'Fira Sans'; src:url('/fonts/fira-sans-latin-700-normal.woff2') format('woff2'); font-weight:700; font-display:swap; }
 @font-face { font-family:'Fira Sans'; src:url('/fonts/fira-sans-latin-900-normal.woff2') format('woff2'); font-weight:900; font-display:swap; }
-:root { --bg:#07173f; --panel:#07173f; --text:#fff; --muted:#bfd3f7; --cyan:#eafe07; --border:#2e96f5; }
+:root { --bg:#07173f; --panel:#07173f; --text:#fff; --muted:#bfd3f7; --cyan:#20e8d0; --border:#2e96f5; }
 body { font-family:Overpass,Arial,sans-serif; }
 h1,h2,h3,.console-tile-label,.console-brand { font-family:'Fira Sans',Overpass,sans-serif; font-weight:700; }
 .touch-console { background:linear-gradient(135deg,#0042a6 0%,#07173f 100%); }
 .console-bar { background:#07173f; border-color:#2e96f5; }
-.console-brand { color:#fff; }.console-brand > svg { color:#eafe07; }.console-brand small,.console-mode { color:#bfd3f7; }
-.console-tile,.tone-green,.tone-violet,.tone-orange { --tile-accent:#eafe07; background:#07173f; border-color:#2e96f5; }
+.console-brand { color:#fff; }.console-brand > svg { color:var(--cyan); }.console-brand small,.console-mode { color:#bfd3f7; }
+.console-tile,.tone-green,.tone-violet,.tone-orange { --tile-accent:var(--cyan); background:#07173f; border-color:#2e96f5; }
 .console-tile:hover { background:#0042a6; }.console-tile-hint,.console-tile-code { color:#bfd3f7; }.console-tile-label { color:#fff; }
 .console-tile-code { letter-spacing:1px; }.console-tile::after { opacity:.2; }
 .touch-console .panel,.crew-person,.crew-detail,.body-map,.crew-vitals div { background:#07173f; border-color:#2e96f5; }
-.crew-person.selected { background:#0042a6; border-color:#eafe07; box-shadow:inset 0 0 0 1px #eafe07; }
+.crew-person.selected { background:#0042a6; border-color:var(--cyan); box-shadow:inset 0 0 0 1px var(--cyan); }
 .crew-initials { background:#0042a6; color:#fff; }.crew-person.selected .crew-initials { background:#07173f; }
-.touch-console .primary { background:#eafe07; color:#07173f; border-color:#eafe07; font-weight:700; }
+.touch-console .primary { background:var(--cyan); color:#07173f; border-color:var(--cyan); font-weight:700; }
 .touch-console .secondary,.touch-console .console-back,.body-region-chips button { background:#0042a6; color:#fff; border-color:#2e96f5; }
-.body-region-chips button[aria-pressed="true"] { background:#eafe07; color:#07173f; border-color:#eafe07; }
-.human-body .body-part.selected { fill:#eafe07; stroke:#fff; }
+.body-region-chips button[aria-pressed="true"] { background:var(--cyan); color:#07173f; border-color:var(--cyan); }
+.human-body .body-part.selected { fill:var(--cyan); stroke:#fff; }
 .touch-console .page-heading p,.crew-overview-heading p,.crew-person > span:not(.crew-initials),.crew-person small,.crew-vitals dt,.crew-detail > small,.body-map small { color:#bfd3f7; }
 .touch-console .eyebrow,.touch-console footer,.touch-console .system-status { color:#bfd3f7; }
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline-color:#eafe07; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline-color:var(--cyan); }
 .touch-console .instruction,.touch-console .measurement-instructions,.touch-console .assessment,.touch-console .notice,.touch-console .alert,.touch-console input,.touch-console select,.touch-console textarea,.touch-console .daily-routine,.touch-console .mood-options label { background:#07173f; }
 .touch-console .instruction,.touch-console .measurement-instructions { border-color:#2e96f5; color:#fff; }
 /* Official supplied color/black logo stays unchanged on a white clear-space panel. */
@@ -3524,7 +3524,7 @@ body { background:#040915; }
 .touch-console .console-tile { border-radius:20px; }
 .console-tile-icon { color:#c4d7ee; }
 .touch-console .console-tile:hover,.touch-console .crew-person:hover { background:#c4daff0e; box-shadow:0 0 35px #9ac4ff0a; transform:translateY(-3px); }
-.touch-console .crew-person.selected { background:#c4daff12; box-shadow:inset 3px 0 #eafe07; }
+.touch-console .crew-person.selected { background:#c4daff12; box-shadow:inset 3px 0 var(--cyan); }
 .touch-console .crew-initials { background:#bdd9ff14; }
 .touch-console .console-tile:active,.touch-console .crew-person:active { background:#c4daff1c; transform:translateY(-1px) scale(.99); }
 .touch-console button { transition:background-color .3s ease,box-shadow .3s ease,transform .3s ease,color .3s ease; }
@@ -3550,8 +3550,8 @@ body { background:#0b1424; }
 .touch-console .console-tile,.touch-console .crew-person,.touch-console .crew-vitals div,.touch-console .assessment,.touch-console .guide-card,.touch-console .moon-launch { background:#14243ac9; border:0; border-left:3px solid #6e8fad; border-radius:0 8px 8px 0; padding:24px 28px 24px 32px; box-shadow:none; }
 .touch-console .console-tile:hover,.touch-console .crew-person:hover { background:#1b3049; border-left-color:#adc9e8; }
 .touch-console .console-tile:active,.touch-console .crew-person:active { background:#233b57; }
-.touch-console .crew-person.selected { background:#1b3049; box-shadow:none; border-left-color:#eafe07; }
-.touch-console .assessment.urgent { border-left-color:#ffad87; }.touch-console .assessment.review { border-left-color:#eafe07; }
+.touch-console .crew-person.selected { background:#1b3049; box-shadow:none; border-left-color:var(--cyan); }
+.touch-console .assessment.urgent { border-left-color:#ffad87; }.touch-console .assessment.review { border-left-color:var(--cyan); }
 .touch-console .instruction,.touch-console .measurement-instructions { border:0; border-left:3px solid #6e8fad; border-radius:0; padding:20px 24px 20px 28px; }
 .touch-console .alert,.touch-console .notice,.touch-console .daily-routine,.touch-console .body-map,.touch-console .device-cache-status,.touch-console .history-table,.touch-console fieldset { border-radius:0; }
 .touch-console input,.touch-console select,.touch-console textarea,.touch-console .mood-options label { background:#101e32; border-color:#6e8fad; border-radius:6px; color:#f5f8ff; }
@@ -3570,12 +3570,12 @@ body { background:#0b1424; }
 .touch-console .page-heading > div { text-align:left; order:1; }.touch-console .page-heading .console-back { order:0; margin:0; }
 .touch-console .form-panel { max-width:none; margin:0; padding:0; }.touch-console .form-panel form { max-width:760px; }.touch-console .form-panel .eyebrow { margin-bottom:16px; }
 .home-workflows { display:grid; gap:24px; }.home-workflows h2 { font-size:16px; margin:0 0 12px; color:#c4d2e6; font-family:Overpass,Arial,sans-serif; }
-.primary-checkin { display:flex; align-items:center; gap:20px; padding:22px 28px; width:100%; min-height:108px; background:#233b57; border:1px solid #9bbbdc; border-left:4px solid #eafe07; border-radius:0 8px 8px 0; text-align:left; }
-.primary-checkin > svg { color:#eafe07; }.primary-checkin strong { display:block; font-size:24px; color:#f5f8ff; }.primary-checkin small { display:block; font-size:15px; line-height:1.5; color:#d0dced; margin-top:6px; }.checkin-action { margin-left:auto; display:flex; gap:10px; align-items:center; font-size:16px; white-space:nowrap; font-weight:700; }
+.primary-checkin { display:flex; align-items:center; gap:20px; padding:22px 28px; width:100%; min-height:108px; background:#233b57; border:1px solid #9bbbdc; border-left:4px solid var(--cyan); border-radius:0 8px 8px 0; text-align:left; }
+.primary-checkin > svg { color:var(--cyan); }.primary-checkin strong { display:block; font-size:24px; color:#f5f8ff; }.primary-checkin small { display:block; font-size:15px; line-height:1.5; color:#d0dced; margin-top:6px; }.checkin-action { margin-left:auto; display:flex; gap:10px; align-items:center; font-size:16px; white-space:nowrap; font-weight:700; }
 .workflow-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }.workflow-link { display:flex; align-items:center; gap:14px; min-height:84px; background:#14243ac9; border:0; border-left:2px solid #6e8fad; border-radius:0 6px 6px 0; padding:16px 18px; text-align:left; }.workflow-link strong { display:block; font-size:16px; }.workflow-link small { display:block; font-size:14px; line-height:1.45; color:#c4d2e6; margin-top:4px; }.workflow-link > svg { color:#c4d2e6; }
 .measurement-safety { font-size:14px; line-height:1.55; color:#d0dced!important; max-width:760px; margin:12px 0 18px; }.touch-console .measurement-help { border:0; padding:0; margin:16px 0; }.measurement-help summary { min-height:44px; padding:12px 0; font-size:14px; cursor:pointer; color:#c4d2e6; }.measurement-help[open] { padding-bottom:16px; }.measurement-help[open] summary { margin-bottom:12px; }
 .touch-console label,.touch-console .fine-print { font-size:14px; }.touch-console .input-row { margin-bottom:16px; }.touch-console .instruction,.touch-console .measurement-help p { font-size:14px; }
-.touch-console main { animation:none; }.touch-console button { transition:background-color .12s ease,color .12s ease; }.touch-console button:hover,.touch-console button:active { transform:none; box-shadow:none; filter:none; }.touch-console button:hover { background-color:#233b57; }.touch-console .primary:hover { background-color:#f1ff68; }
+.touch-console main { animation:none; }.touch-console button { transition:background-color .12s ease,color .12s ease; }.touch-console button:hover,.touch-console button:active { transform:none; box-shadow:none; filter:none; }.touch-console button:hover { background-color:#233b57; }.touch-console .primary:hover { background-color:#80fff0; }
 @media(max-width:760px) { .workflow-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.primary-checkin { padding:20px; flex-wrap:wrap; }.primary-checkin > span:first-of-type { flex:1; }.checkin-action { margin-left:52px; }.primary-checkin strong { font-size:22px; }.primary-checkin small { font-size:14px; } }
 @media(max-width:420px) { .workflow-grid { grid-template-columns:1fr; }.workflow-link { min-height:72px; }.touch-console .page-heading h1 { font-size:25px; } }
 @media(min-width:700px) { .touch-console main.feature-page { padding-left:108px; }.touch-console .feature-page .page-heading .console-back { margin-left:-76px; } }
@@ -3602,3 +3602,29 @@ body { background:#0b1424; }
 .active-profile-bar button {
   flex-shrink: 0;
 }
+/* Keep the supplied project mark legible without expanding the header. */
+.console-brand-logo { display:block; width:72px; height:auto; flex-shrink:0; object-fit:contain; }
+@media(max-width:699px) { .console-brand { gap:10px; }.console-brand-logo { width:52px; } }
+
+/* Project identity: turquoise signal, quiet navy surfaces, readable text. */
+:root { --cyan:#20e8d0; --bg:#101a2d; --surface:#192b40; --text:#f5f8ff; --muted:#c4d2e6; --border:#7696ae; }
+body { background:var(--bg); }
+.touch-console { background-color:var(--bg); background-image:linear-gradient(135deg,#20e8d008,#101a2d66),url('/brand/deep-space-background.svg'); }
+.touch-console .console-brand,.touch-console .console-brand:hover { background:transparent; }
+.console-brand small { color:#bce5e4; }
+.primary-checkin { background:#193b49; border-color:#7696ae; border-left-color:var(--cyan); }
+.touch-console .primary-checkin:hover { background:#234c59; }
+.primary-checkin > svg,.workflow-link > svg,.console-tile-icon { color:var(--cyan); }
+.workflow-link { background:#192b40; border-left-color:#7696ae; }
+.touch-console .workflow-link:hover,.touch-console .secondary:hover,.touch-console .console-back:hover { background:#234052; }
+.touch-console .console-tile,.touch-console .crew-person,.touch-console .crew-vitals div,.touch-console .assessment,.touch-console .guide-card,.touch-console .moon-launch { background:#192b40; border-left-color:#7696ae; }
+.touch-console .crew-person.selected { background:#193b49; border-left-color:var(--cyan); }
+.touch-console .assessment.urgent { border-left-color:#ffad87; }
+.touch-console .assessment.review { border-left-color:#ffd185; }
+.touch-console .primary { background:var(--cyan); color:#101a2d; border-color:var(--cyan); }
+.touch-console .primary:hover { background:#80fff0; }
+.touch-console input,.touch-console select,.touch-console textarea,.touch-console .mood-options label { background:#101e32; border-color:#7696ae; }
+.touch-console .mood-options label:has(input:checked) { background:#193b49; border-color:var(--cyan); }
+.active-profile-bar { background:#192b40; border-color:#7696ae; }
+.touch-console .panel a,.touch-console .instruction a { color:#7bf5e6; text-decoration:underline; text-underline-offset:3px; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline-color:var(--cyan); }

@@ -403,7 +403,14 @@ export default function Home() {
             onClick={() => navigate("Dashboard")}
             aria-label="Deep Space Health Systems main screen"
           >
-            <Icon name="planet" size={30} />
+            <Image
+              className="console-brand-logo"
+              src="/brand/deep-space-logo.png"
+              alt=""
+              width={320}
+              height={192}
+              unoptimized
+            />
             <span>
               DEEP SPACE<small>HEALTH SYSTEMS</small>
             </span>
